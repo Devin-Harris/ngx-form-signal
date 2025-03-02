@@ -21,11 +21,11 @@ export class FormSubscriptionDestroyingExampleComponent {
 
    readonly render = signal(true);
 
-   childDirtySignal: Signal<boolean | null> | null = null;
+   childDirtySignal: Signal<boolean> | null = null;
 
    onRegisterDirtyInfo(event: {
       subscription: Subscription | null;
-      dirtySignal: Signal<boolean | null>;
+      dirtySignal: Signal<boolean>;
    }) {
       this.childDirtySignal = event.dirtySignal;
       if (event.subscription) {

@@ -18,6 +18,6 @@ export function buildFormInvalidSignal<T = any>(
    return computed(() => {
       const v = valueSignal();
       const s = statusSignal();
-      return formAsSignal()?.invalid ?? null;
+      return !!formAsSignal()?.invalid;
    });
 }

@@ -31,7 +31,7 @@ export class FormSubscriptionDestroyingChildComponent {
 
    readonly registerDirtyInfo = output<{
       subscription: Subscription | null;
-      dirtySignal: Signal<boolean | null>;
+      dirtySignal: Signal<boolean>;
    }>();
 
    readonly dirtySubscriptionChange = effect(() => {

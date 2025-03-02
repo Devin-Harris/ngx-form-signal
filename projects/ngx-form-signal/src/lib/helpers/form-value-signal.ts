@@ -1,20 +1,21 @@
-import { effect, Injector, Signal, signal, untracked } from '@angular/core';
+import { effect, Signal, signal, untracked } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { FormSignalOptions } from '../types/form-signal-options';
 import { FormFromType, OptionalFormFromType } from '../types/form-type';
 
 export function buildFormValueSignal<T = any>(
    formAsSignal: Signal<OptionalFormFromType<T>>,
-   injector?: Injector
+   options: FormSignalOptions<T>
 ) {
    const value$ = signal<FormFromType<T>['value'] | null>(
       formAsSignal()?.value ?? null,
-      { equal: () => false }
+      { equal: options.equalityFns?.valueEquality ?? (() => false) }
    );
    const rawValue$ = signal<FormFromType<T>['value'] | null>(
       formAsSignal()?.getRawValue() ?? null,
       {
-         equal: () => false,
+         equal: options.equalityFns?.valueEquality ?? (() => false),
       }
    );
    const valueChangeSubscription$ = signal<Subscription | null>(null);
@@ -37,11 +38,11 @@ export function buildFormValueSignal<T = any>(
             );
             setValue();
          });
-         onCleanup(() =>
-            untracked(() => valueChangeSubscription$())?.unsubscribe()
+         onCleanup(
+            () => untracked(() => valueChangeSubscription$())?.unsubscribe()
          );
       },
-      { injector }
+      { injector: options.injector }
    );
    return { value$, rawValue$, valueChangeSubscription$ };
 }

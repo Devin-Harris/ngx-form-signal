@@ -1,6 +1,5 @@
 import {
    assertInInjectionContext,
-   Injector,
    isSignal,
    Signal,
    signal,
@@ -11,19 +10,23 @@ import { buildFormSnapshotSignal } from './helpers/form-snapshot-signal';
 import { buildFormStatusSignal } from './helpers/form-status-signal';
 import { buildFormTouchedSignal } from './helpers/form-touched-signal';
 import { buildFormValueSignal } from './helpers/form-value-signal';
+import {
+   buildDefaultFormSignalOptions,
+   FormSignalOptions,
+} from './types/form-signal-options';
 import { FormSignal, FormSignalState } from './types/form-signal-type';
 import { OptionalFormFromType } from './types/form-type';
 
 export function formSignal<T = any>(
    form: Signal<OptionalFormFromType<T>> | OptionalFormFromType<T>,
-   injector?: Injector
+   options: FormSignalOptions = buildDefaultFormSignalOptions<T>()
 ): FormSignal<T> {
    const formAsSignal = isSignal(form) ? form : signal(form);
-   if (!injector) {
+   if (!options.injector) {
       assertInInjectionContext(() => {});
    }
    const { value$, rawValue$, valueChangeSubscription$ } =
-      buildFormValueSignal<T>(formAsSignal, injector);
+      buildFormValueSignal<T>(formAsSignal, options);
    const {
       status$,
       valid$,
@@ -32,14 +35,14 @@ export function formSignal<T = any>(
       disabled$,
       enabled$,
       statusChangeSubscription$,
-   } = buildFormStatusSignal<T>(formAsSignal, injector);
+   } = buildFormStatusSignal<T>(formAsSignal, options);
    const { touched$, untouched$, touchedChangeSubscription$ } =
-      buildFormTouchedSignal(formAsSignal, injector);
+      buildFormTouchedSignal(formAsSignal, options);
    const { dirty$, pristine$, dirtyChangeSubscription$ } = buildFormDirtySignal(
       formAsSignal,
-      injector
+      options
    );
-   const errors$ = buildFormErrorSignal(formAsSignal, value$, status$);
+   const errors$ = buildFormErrorSignal(formAsSignal, value$, status$, options);
 
    const formSignals: FormSignalState<T> = {
       status: status$.asReadonly(),

@@ -1,21 +1,15 @@
-import {
-   computed,
-   effect,
-   Injector,
-   Signal,
-   signal,
-   untracked,
-} from '@angular/core';
+import { computed, effect, Signal, signal, untracked } from '@angular/core';
 import { PristineChangeEvent } from '@angular/forms';
 import { filter, Subscription } from 'rxjs';
+import { FormSignalOptions } from '../types/form-signal-options';
 import { OptionalFormFromType } from '../types/form-type';
 
 export function buildFormDirtySignal(
    formAsSignal: Signal<OptionalFormFromType<any>>,
-   injector?: Injector
+   options: FormSignalOptions
 ) {
-   const dirty$ = signal<boolean | null>(formAsSignal()?.dirty ?? null, {
-      equal: () => false,
+   const dirty$ = signal<boolean>(!!formAsSignal()?.dirty, {
+      equal: options.equalityFns?.dirtyEquality,
    });
    const dirtyChangeSubscription$ = signal<Subscription | null>(null);
 
@@ -25,7 +19,7 @@ export function buildFormDirtySignal(
          untracked(() => {
             const setDirty = () => {
                untracked(() => {
-                  dirty$.set(form?.dirty ?? null);
+                  dirty$.set(!!form?.dirty);
                });
             };
 
@@ -43,7 +37,7 @@ export function buildFormDirtySignal(
             () => untracked(() => dirtyChangeSubscription$())?.unsubscribe()
          );
       },
-      { injector }
+      { injector: options.injector }
    );
 
    const pristine$ = computed(() => !dirty$());

@@ -1,22 +1,17 @@
-import {
-   computed,
-   effect,
-   Injector,
-   Signal,
-   signal,
-   untracked,
-} from '@angular/core';
+import { computed, effect, Signal, signal, untracked } from '@angular/core';
 import { FormControlStatus } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { FormSignalOptions } from '../types/form-signal-options';
 import { OptionalFormFromType } from '../types/form-type';
 
 export function buildFormStatusSignal<T = any>(
    formAsSignal: Signal<OptionalFormFromType<T>>,
-   injector?: Injector
+   options: FormSignalOptions<T>
 ) {
+   const equal = options.equalityFns?.statusEquality ?? (() => false);
    const status$ = signal<FormControlStatus | null>(
       formAsSignal()?.status ?? null,
-      { equal: () => false }
+      { equal }
    );
    const statusChangeSubscription$ = signal<Subscription | null>(null);
    const formStatusChangeEffect = effect(
@@ -37,11 +32,11 @@ export function buildFormStatusSignal<T = any>(
             );
             setStatus();
          });
-         onCleanup(() =>
-            untracked(() => statusChangeSubscription$())?.unsubscribe()
+         onCleanup(
+            () => untracked(() => statusChangeSubscription$())?.unsubscribe()
          );
       },
-      { injector }
+      { injector: options.injector }
    );
 
    const valid$ = computed(() => status$() === 'VALID');

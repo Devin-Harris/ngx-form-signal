@@ -1,21 +1,15 @@
-import {
-   computed,
-   effect,
-   Injector,
-   Signal,
-   signal,
-   untracked,
-} from '@angular/core';
+import { computed, effect, Signal, signal, untracked } from '@angular/core';
 import { TouchedChangeEvent } from '@angular/forms';
 import { filter, Subscription } from 'rxjs';
+import { FormSignalOptions } from '../types/form-signal-options';
 import { OptionalFormFromType } from '../types/form-type';
 
 export function buildFormTouchedSignal(
    formAsSignal: Signal<OptionalFormFromType<any>>,
-   injector?: Injector
+   options: FormSignalOptions
 ) {
-   const touched$ = signal<boolean | null>(formAsSignal()?.touched ?? null, {
-      equal: () => false,
+   const touched$ = signal<boolean>(!!formAsSignal()?.touched, {
+      equal: options.equalityFns?.touchedEquality,
    });
    const touchedChangeSubscription$ = signal<Subscription | null>(null);
 
@@ -25,7 +19,7 @@ export function buildFormTouchedSignal(
          untracked(() => {
             const setTouched = () => {
                untracked(() => {
-                  touched$.set(form?.touched ?? null);
+                  touched$.set(!!form?.touched);
                });
             };
 
@@ -39,14 +33,16 @@ export function buildFormTouchedSignal(
             );
             setTouched();
          });
-         onCleanup(() =>
-            untracked(() => touchedChangeSubscription$())?.unsubscribe()
+         onCleanup(
+            () => untracked(() => touchedChangeSubscription$())?.unsubscribe()
          );
       },
-      { injector }
+      { injector: options.injector }
    );
 
-   const untouched$ = computed(() => !touched$());
+   const untouched$ = computed(() => !touched$(), {
+      equal: options.equalityFns?.touchedEquality,
+   });
 
    return { touched$, untouched$, touchedChangeSubscription$ };
 }
