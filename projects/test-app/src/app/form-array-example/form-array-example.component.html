@@ -1,1 +1,16 @@
 <form-signal-preview [form]="formArray"></form-signal-preview>
+
+<div class="extra-actions">
+   <input type="text" #name />
+   <button (click)="add(name.value)">Add</button>
+   <button (click)="remove(name.value)">Remove</button>
+   <button (click)="disable(name.value)">Disable</button>
+   <button (click)="enable(name.value)">Enable</button>
+   <button (click)="touch(name.value)">Touch</button>
+   <button (click)="untouch(name.value)">Untouch</button>
+</div>
+
+duplicateNames:
+<pre>
+   {{ duplicateNames() | json }}
+</pre>

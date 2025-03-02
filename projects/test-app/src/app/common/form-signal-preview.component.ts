@@ -58,11 +58,7 @@ export class FormSignalPreviewComponent {
    setError() {
       const form = this.form();
       if (form) {
-         if (form.errors) {
-            form.setErrors(null);
-         } else {
-            form.setErrors({ someError: true });
-         }
+         form.setErrors(form.errors ? null : { someError: true });
       }
    }
 }
