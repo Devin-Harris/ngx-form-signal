@@ -39,8 +39,8 @@ export function buildFormDirtySignal(
             );
             setDirty();
          });
-         onCleanup(() =>
-            untracked(() => dirtyChangeSubscription$())?.unsubscribe()
+         onCleanup(
+            () => untracked(() => dirtyChangeSubscription$())?.unsubscribe()
          );
       },
       { injector }
