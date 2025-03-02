@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { FormSignalPreviewComponent } from '../form-signal-preview/form-signal-preview.component';
+import { FormSignalPreviewComponent } from '../../common/form-signal-preview.component';
 
 @Component({
    selector: 'form-info',

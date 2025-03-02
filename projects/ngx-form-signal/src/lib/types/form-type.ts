@@ -1,10 +1,18 @@
-import { AbstractControl, FormControl, FormGroup } from '@angular/forms';
+import {
+   AbstractControl,
+   FormArray,
+   FormControl,
+   FormGroup,
+} from '@angular/forms';
 
 export type FormFromType<T> = T extends { [K in keyof T]: AbstractControl<any> }
    ? FormGroup<T>
-   : FormControl<T>;
+   : T extends AbstractControl<any>
+     ? FormArray<T>
+     : FormControl<T>;
 
 export type OptionalFormFromType<T = any> =
    | (T extends { [K in keyof T]: AbstractControl<any> } ? FormGroup<T> : never)
    | FormControl<T>
+   | (T extends AbstractControl<any> ? FormArray<T> : never)
    | null;

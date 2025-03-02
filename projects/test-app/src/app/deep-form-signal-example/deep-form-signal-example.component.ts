@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
    selector: 'deep-form-signal-example',
@@ -8,11 +7,11 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
    styleUrl: './deep-form-signal-example.component.scss',
 })
 export class DeepFormSignalExampleComponent {
-   readonly form = new FormGroup({
-      name: new FormControl('Joe Smith', { validators: Validators.required }),
-      email: new FormControl('js@someemail.com', {
-         validators: [Validators.required, Validators.email],
-      }),
-      message: new FormControl('Hello world!'),
-   });
+   // readonly form = new FormGroup({
+   //    name: new FormControl('Joe Smith', { validators: Validators.required }),
+   //    email: new FormControl('js@someemail.com', {
+   //       validators: [Validators.required, Validators.email],
+   //    }),
+   //    message: new FormControl('Hello world!'),
+   // });
 }

@@ -1,7 +1,30 @@
 <div class="nav">
-   <a [routerLink]="['/']"> Default </a>
-   <a [routerLink]="['/deep-form-signal']"> Deep Form Signal </a>
-   <a [routerLink]="['/form-subscription-destroying']">
+   <a
+      [routerLinkActive]="'active'"
+      routerLink="./"
+      [routerLinkActiveOptions]="{ exact: true }"
+   >
+      Default
+   </a>
+   <a
+      [routerLinkActive]="'active'"
+      routerLink="/deep-form-signal"
+      [routerLinkActiveOptions]="{ exact: true }"
+   >
+      Deep Form Signal
+   </a>
+   <a
+      [routerLinkActive]="'active'"
+      routerLink="/form-array"
+      [routerLinkActiveOptions]="{ exact: true }"
+   >
+      Form Array
+   </a>
+   <a
+      [routerLinkActive]="'active'"
+      routerLink="/form-subscription-destroying"
+      [routerLinkActiveOptions]="{ exact: true }"
+   >
       Subscription Destroying
    </a>
 </div>

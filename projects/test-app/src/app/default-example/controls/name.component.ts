@@ -1,7 +1,7 @@
 import { Component, input } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { formSignal } from '../../../../../ngx-form-signal/src/public-api';
-import { FormSignalPreviewComponent } from '../form-signal-preview/form-signal-preview.component';
+import { FormSignalPreviewComponent } from '../../common/form-signal-preview.component';
 
 @Component({
    selector: 'name-control',

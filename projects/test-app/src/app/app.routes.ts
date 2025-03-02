@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
    {
       path: '',
+      pathMatch: 'full',
       loadComponent: () =>
          import('./default-example/default-example.component').then(
             ({ DefaultExampleComponent }) => DefaultExampleComponent
@@ -16,6 +17,13 @@ export const routes: Routes = [
          ).then(
             ({ DeepFormSignalExampleComponent }) =>
                DeepFormSignalExampleComponent
+         ),
+   },
+   {
+      path: 'form-array',
+      loadComponent: () =>
+         import('./form-array-example/form-array-example.component').then(
+            ({ FormArrayExampleComponent }) => FormArrayExampleComponent
          ),
    },
    {

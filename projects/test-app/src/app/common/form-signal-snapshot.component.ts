@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, effect, input } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
-import { formSignal } from '../../../../../ngx-form-signal/src/lib/form-signal';
+import { FormArray, FormControl, FormGroup } from '@angular/forms';
+import { formSignal } from '../../../../ngx-form-signal/src/lib/form-signal';
 
 @Component({
    selector: 'form-signal-snapshot',
@@ -85,7 +85,7 @@ import { formSignal } from '../../../../../ngx-form-signal/src/lib/form-signal';
    `,
 })
 export class FormSignalSnapshotComponent {
-   readonly form = input<FormControl | FormGroup | null>(null);
+   readonly form = input<FormControl | FormGroup | FormArray | null>(null);
    readonly formSignal = formSignal(this.form);
 
    readonly formChange = effect(() => {

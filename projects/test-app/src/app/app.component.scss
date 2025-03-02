@@ -11,6 +11,11 @@
       a {
          padding: 0.5em;
          display: block;
+         text-decoration: none;
+         color: rgb(56, 168, 233);
+         &.active {
+            color: rgb(118, 56, 233);
+         }
       }
    }
    .route {

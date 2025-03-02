@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, input, signal } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { FormSignalSnapshotComponent } from './form-signal-snapshot.component';
 
 @Component({
@@ -47,7 +47,7 @@ import { FormSignalSnapshotComponent } from './form-signal-snapshot.component';
    `,
 })
 export class FormSignalPreviewComponent {
-   readonly form = input<FormControl | FormGroup | null>(null);
+   readonly form = input<FormControl | FormGroup | FormArray | null>(null);
 
    readonly showPreview = signal(true);
 
