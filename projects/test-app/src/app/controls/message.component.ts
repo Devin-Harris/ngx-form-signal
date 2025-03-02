@@ -11,7 +11,7 @@ import { FormSignalPreviewComponent } from '../form-signal-preview/form-signal-p
       @let c = control(); @if (c) {
       <div class="form-control">
          <label for="message">Message</label>
-         <textarea [formControl]="c" name="message"></textarea>
+         <textarea [formControl]="c" name="message" rows="1"></textarea>
          <form-signal-preview [form]="c"></form-signal-preview>
       </div>
       }

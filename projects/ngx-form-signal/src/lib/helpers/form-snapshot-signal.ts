@@ -13,10 +13,15 @@ export function buildFormSnapshotSignal<T = any>(
          value: formSignalState.value(),
          rawValue: formSignalState.rawValue(),
          touched: formSignalState.touched(),
+         untouched: formSignalState.untouched(),
          dirty: formSignalState.dirty(),
-         disabled: formSignalState.disabled(),
-         errors: formSignalState.errors(),
+         pristine: formSignalState.pristine(),
+         valid: formSignalState.valid(),
          invalid: formSignalState.invalid(),
+         pending: formSignalState.pending(),
+         disabled: formSignalState.disabled(),
+         enabled: formSignalState.enabled(),
+         errors: formSignalState.errors(),
          subscriptions: {
             valueChangeSubscription:
                formSignalState.subscriptions.valueChangeSubscription(),

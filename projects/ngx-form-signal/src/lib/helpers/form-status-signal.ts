@@ -1,4 +1,11 @@
-import { effect, Injector, Signal, signal, untracked } from '@angular/core';
+import {
+   computed,
+   effect,
+   Injector,
+   Signal,
+   signal,
+   untracked,
+} from '@angular/core';
 import { FormControlStatus } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { OptionalFormFromType } from '../types/form-type';
@@ -36,5 +43,20 @@ export function buildFormStatusSignal<T = any>(
       },
       { injector }
    );
-   return { status$, statusChangeSubscription$ };
+
+   const valid$ = computed(() => status$() === 'VALID');
+   const invalid$ = computed(() => status$() === 'INVALID');
+   const pending$ = computed(() => status$() == 'PENDING');
+   const disabled$ = computed(() => status$() === 'DISABLED');
+   const enabled$ = computed(() => status$() !== 'DISABLED');
+
+   return {
+      status$,
+      valid$,
+      invalid$,
+      pending$,
+      disabled$,
+      enabled$,
+      statusChangeSubscription$,
+   };
 }

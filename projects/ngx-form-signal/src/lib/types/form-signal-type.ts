@@ -1,7 +1,5 @@
 import { buildFormDirtySignal } from '../helpers/form-dirty-signal';
-import { buildFormDisabledSignal } from '../helpers/form-disabled-signal';
 import { buildFormErrorSignal } from '../helpers/form-error-signal';
-import { buildFormInvalidSignal } from '../helpers/form-invalid-signal';
 import { buildFormStatusSignal } from '../helpers/form-status-signal';
 import { buildFormTouchedSignal } from '../helpers/form-touched-signal';
 import { buildFormValueSignal } from '../helpers/form-value-signal';
@@ -41,12 +39,17 @@ export type FormSignalState<T = any> = {
    touched: ReturnType<
       ReturnType<typeof buildFormTouchedSignal>['touched$']['asReadonly']
    >;
+   untouched: ReturnType<typeof buildFormTouchedSignal>['untouched$'];
    dirty: ReturnType<
       ReturnType<typeof buildFormDirtySignal>['dirty$']['asReadonly']
    >;
-   disabled: ReturnType<typeof buildFormDisabledSignal>;
+   pristine: ReturnType<typeof buildFormDirtySignal>['pristine$'];
+   valid: ReturnType<typeof buildFormStatusSignal>['valid$'];
+   invalid: ReturnType<typeof buildFormStatusSignal>['invalid$'];
+   pending: ReturnType<typeof buildFormStatusSignal>['pending$'];
+   disabled: ReturnType<typeof buildFormStatusSignal>['disabled$'];
+   enabled: ReturnType<typeof buildFormStatusSignal>['enabled$'];
    errors: ReturnType<typeof buildFormErrorSignal>;
-   invalid: ReturnType<typeof buildFormInvalidSignal>;
    subscriptions: FormSignalSubscriptionsState<T>;
 };
 
@@ -55,9 +58,11 @@ export type FormSnapshotSignalSubscriptionsState<T = any> = {
       FormSignalSubscriptionsState<T>[x]
    >;
 };
-
 export type FormSnapshotSignalState<T = any> = {
    [x in keyof Omit<FormSignalState<T>, 'subscriptions'>]: ReturnType<
       FormSignalState<T>[x]
    >;
 } & { subscriptions: FormSnapshotSignalSubscriptionsState<T> };
+
+export type FormSignal<T = any> = FormSignalState<T> &
+   (() => FormSnapshotSignalState<T>);

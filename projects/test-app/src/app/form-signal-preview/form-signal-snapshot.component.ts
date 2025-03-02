@@ -27,12 +27,37 @@ import { formSignal } from '../../../../ngx-form-signal/src/lib/form-signal';
             <pre>{{ formSnapshot.touched | json }}</pre>
          </div>
          <div class="form-info">
+            <strong>Untouched:</strong>
+            <pre>{{ formSnapshot.untouched | json }}</pre>
+         </div>
+         <div class="form-info">
             <strong>Dirty:</strong>
             <pre>{{ formSnapshot.dirty | json }}</pre>
          </div>
          <div class="form-info">
+            <strong>Pristine:</strong>
+            <pre>{{ formSnapshot.pristine | json }}</pre>
+         </div>
+         <div class="form-info">
             <strong>Disabled:</strong>
             <pre>{{ formSnapshot.disabled | json }}</pre>
+         </div>
+         <div class="form-info">
+            <strong>Enabled:</strong>
+            <pre>{{ formSnapshot.enabled | json }}</pre>
+         </div>
+
+         <div class="form-info">
+            <strong>Pending:</strong>
+            <pre>{{ formSnapshot.pending | json }}</pre>
+         </div>
+         <div class="form-info">
+            <strong>Valid:</strong>
+            <pre>{{ formSnapshot.valid | json }}</pre>
+         </div>
+         <div class="form-info">
+            <strong>Invalid:</strong>
+            <pre>{{ formSnapshot.invalid | json }}</pre>
          </div>
          <div class="form-info">
             <strong>Errors:</strong>
@@ -43,7 +68,7 @@ import { formSignal } from '../../../../ngx-form-signal/src/lib/form-signal';
    styles: `
    .form-info-container {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       grid-gap: 1px;
    
       .form-info {

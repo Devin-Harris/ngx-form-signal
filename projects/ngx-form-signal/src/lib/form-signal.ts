@@ -6,54 +6,55 @@ import {
    signal,
 } from '@angular/core';
 import { buildFormDirtySignal } from './helpers/form-dirty-signal';
-import { buildFormDisabledSignal } from './helpers/form-disabled-signal';
 import { buildFormErrorSignal } from './helpers/form-error-signal';
-import { buildFormInvalidSignal } from './helpers/form-invalid-signal';
 import { buildFormSnapshotSignal } from './helpers/form-snapshot-signal';
 import { buildFormStatusSignal } from './helpers/form-status-signal';
 import { buildFormTouchedSignal } from './helpers/form-touched-signal';
 import { buildFormValueSignal } from './helpers/form-value-signal';
-import {
-   FormSignalState,
-   FormSnapshotSignalState,
-} from './types/form-signal-type';
+import { FormSignal, FormSignalState } from './types/form-signal-type';
 import { OptionalFormFromType } from './types/form-type';
 
 export function formSignal<T = any>(
    form: Signal<OptionalFormFromType<T>> | OptionalFormFromType<T>,
    injector?: Injector
-) {
+): FormSignal<T> {
    const formAsSignal = isSignal(form) ? form : signal(form);
    if (!injector) {
       assertInInjectionContext(() => {});
    }
    const { value$, rawValue$, valueChangeSubscription$ } =
       buildFormValueSignal<T>(formAsSignal, injector);
-   const { status$, statusChangeSubscription$ } = buildFormStatusSignal<T>(
+   const {
+      status$,
+      valid$,
+      invalid$,
+      pending$,
+      disabled$,
+      enabled$,
+      statusChangeSubscription$,
+   } = buildFormStatusSignal<T>(formAsSignal, injector);
+   const { touched$, untouched$, touchedChangeSubscription$ } =
+      buildFormTouchedSignal(formAsSignal, injector);
+   const { dirty$, pristine$, dirtyChangeSubscription$ } = buildFormDirtySignal(
       formAsSignal,
       injector
    );
-   const { touched$, touchedChangeSubscription$ } = buildFormTouchedSignal(
-      formAsSignal,
-      injector
-   );
-   const { dirty$, dirtyChangeSubscription$ } = buildFormDirtySignal(
-      formAsSignal,
-      injector
-   );
-   const disabled$ = buildFormDisabledSignal(status$);
    const errors$ = buildFormErrorSignal(formAsSignal, value$, status$);
-   const invalid$ = buildFormInvalidSignal(formAsSignal, value$, status$);
 
    const formSignals: FormSignalState<T> = {
       status: status$.asReadonly(),
       value: value$.asReadonly(),
       rawValue: rawValue$.asReadonly(),
       touched: touched$.asReadonly(),
+      untouched: untouched$,
       dirty: dirty$.asReadonly(),
-      disabled: disabled$,
-      errors: errors$,
+      pristine: pristine$,
+      valid: valid$,
       invalid: invalid$,
+      pending: pending$,
+      disabled: disabled$,
+      enabled: enabled$,
+      errors: errors$,
       subscriptions: {
          valueChangeSubscription: valueChangeSubscription$.asReadonly(),
          statusChangeSubscription: statusChangeSubscription$.asReadonly(),
@@ -63,8 +64,7 @@ export function formSignal<T = any>(
    };
 
    const snapshot$ = buildFormSnapshotSignal(formSignals);
-   const formSignalObj = (() => snapshot$()) as FormSignalState<T> &
-      (() => FormSnapshotSignalState<T>);
+   const formSignalObj = (() => snapshot$()) as FormSignal<T>;
 
    Object.setPrototypeOf(formSignalObj, formSignals);
 

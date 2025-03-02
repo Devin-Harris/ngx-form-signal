@@ -1,4 +1,11 @@
-import { effect, Injector, Signal, signal, untracked } from '@angular/core';
+import {
+   computed,
+   effect,
+   Injector,
+   Signal,
+   signal,
+   untracked,
+} from '@angular/core';
 import { PristineChangeEvent } from '@angular/forms';
 import { filter, Subscription } from 'rxjs';
 import { OptionalFormFromType } from '../types/form-type';
@@ -39,5 +46,7 @@ export function buildFormDirtySignal(
       { injector }
    );
 
-   return { dirty$, dirtyChangeSubscription$ };
+   const pristine$ = computed(() => !dirty$());
+
+   return { dirty$, pristine$, dirtyChangeSubscription$ };
 }

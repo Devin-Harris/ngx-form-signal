@@ -22,6 +22,9 @@ import { FormSignalSnapshotComponent } from './form-signal-snapshot.component';
          <button (click)="f.touched ? f.markAsUntouched() : f.markAsTouched()">
             {{ f.touched ? 'Mark as untouched' : 'Mark as touched' }}
          </button>
+         <button (click)="setError()">
+            {{ f.errors ? 'Clear errors' : 'Set errors' }}
+         </button>
          <button (click)="toggle()">{{ show ? 'Hide' : 'Show' }} Info</button>
       </div>
       }
@@ -47,5 +50,16 @@ export class FormSignalPreviewComponent {
 
    toggle() {
       this.showPreview.update((s) => !s);
+   }
+
+   setError() {
+      const form = this.form();
+      if (form) {
+         if (form.errors) {
+            form.setErrors(null);
+         } else {
+            form.setErrors({ someError: true });
+         }
+      }
    }
 }
