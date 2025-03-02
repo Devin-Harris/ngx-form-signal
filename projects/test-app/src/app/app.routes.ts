@@ -18,4 +18,14 @@ export const routes: Routes = [
                DeepFormSignalExampleComponent
          ),
    },
+   {
+      path: 'form-subscription-destroying',
+      loadComponent: () =>
+         import(
+            './form-subscription-destroying-example/form-subscription-destroying-example.component'
+         ).then(
+            ({ FormSubscriptionDestroyingExampleComponent }) =>
+               FormSubscriptionDestroyingExampleComponent
+         ),
+   },
 ];

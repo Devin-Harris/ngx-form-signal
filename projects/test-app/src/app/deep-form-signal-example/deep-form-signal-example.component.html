@@ -1,12 +1,1 @@
-<!-- Notice how when the child is destroyed, the internal subscriptions to the form valuechanges, statuschanges, pristine changes etc... are automatically unsubscribed -->
-@if (render()) {
-   <deep-form-signal-child
-      [form]="form"
-      (registerDirtySubscription)="onRegisterDirtySubscription($event)"
-   ></deep-form-signal-child>
-}
-<br />
-<button (click)="toggle()">{{ render() ? 'Destroy' : 'Build' }} Child</button>
-<button (click)="form.dirty ? form.markAsPristine() : form.markAsDirty()">
-   {{ form.dirty ? 'Mark as pristine' : 'Mark as dirty' }}
-</button>
+in progress...

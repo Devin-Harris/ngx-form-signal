@@ -1,12 +1,14 @@
 :host {
+   display: block;
    height: 100%;
+   background-color: gray;
+   padding: 2px;
 }
 .content {
    display: flex;
    flex-direction: column;
    justify-content: flex-start;
    align-items: flex-start;
-   background-color: gray;
    height: 100%;
    gap: 0.25em;
    .overall-info {

@@ -1,0 +1,18 @@
+<!-- Notice how when the child is destroyed, the internal subscriptions to the form valuechanges, statuschanges, pristine changes etc... are automatically unsubscribed -->
+@if (render()) {
+   <form-subscription-destroying-child
+      [form]="form"
+      (registerDirtyInfo)="onRegisterDirtyInfo($event)"
+   ></form-subscription-destroying-child>
+}
+
+<!-- Notice how once the child is destroyed, the internal signal that was initialized in the component not longer updates with the forms dirty state changes -->
+<p>
+   Child Registered Dirty Signal:
+   <span> {{ childDirtySignal ? childDirtySignal() : 'unknown' }} </span>
+</p>
+
+<button (click)="toggle()">{{ render() ? 'Destroy' : 'Build' }} Child</button>
+<button (click)="form.dirty ? form.markAsPristine() : form.markAsDirty()">
+   {{ form.dirty ? 'Mark as pristine' : 'Mark as dirty' }}
+</button>

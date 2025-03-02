@@ -1,1 +1,11 @@
-<router-outlet></router-outlet>
+<div class="nav">
+   <a [routerLink]="['/']"> Default </a>
+   <a [routerLink]="['/deep-form-signal']"> Deep Form Signal </a>
+   <a [routerLink]="['/form-subscription-destroying']">
+      Subscription Destroying
+   </a>
+</div>
+
+<div class="route">
+   <router-outlet></router-outlet>
+</div>
