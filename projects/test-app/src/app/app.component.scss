@@ -1,19 +1,31 @@
+:host {
+   height: 100%;
+}
 .content {
    display: flex;
    flex-direction: column;
    justify-content: flex-start;
    align-items: flex-start;
-   gap: 1em;
-   margin: 1em;
+   background-color: gray;
+   height: 100%;
+   gap: 0.25em;
    .overall-info {
-      flex: 1;
       width: 100%;
    }
    .form-controls {
       width: 100%;
       display: flex;
-      align-items: flex-start;
-      justify-content: flex-start;
-      gap: 2em;
+      flex-wrap: wrap;
+      gap: 0.25em;
+   }
+
+   form-info,
+   name-control,
+   email-control,
+   message-control {
+      padding: 1em;
+      // border-bottom: 3px solid rgb(44, 206, 255);
+      border-radius: 0.5em;
+      background-color: white;
    }
 }

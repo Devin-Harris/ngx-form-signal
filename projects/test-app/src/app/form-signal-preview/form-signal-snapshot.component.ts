@@ -67,8 +67,9 @@ import { formSignal } from '../../../../ngx-form-signal/src/lib/form-signal';
    `,
    styles: `
    .form-info-container {
+      width: 100%;
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
       grid-gap: 1px;
    
       .form-info {
@@ -76,7 +77,8 @@ import { formSignal } from '../../../../ngx-form-signal/src/lib/form-signal';
          padding: .5em;
          pre {
             margin: 0;
-            font-size: .85em;
+            font-size: .85em;     
+            width: max-content;
          }
       }
    }
