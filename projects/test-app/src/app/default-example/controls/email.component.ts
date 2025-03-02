@@ -1,17 +1,18 @@
 import { Component, input } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { formSignal } from '../../../../ngx-form-signal/src/public-api';
+import { formSignal } from '../../../../../ngx-form-signal/src/public-api';
 import { FormSignalPreviewComponent } from '../form-signal-preview/form-signal-preview.component';
 
 @Component({
-   selector: 'name-control',
+   selector: 'email-control',
    standalone: true,
    imports: [ReactiveFormsModule, FormSignalPreviewComponent],
    template: `
-      @let c = control(); @if (c) {
+      @let c = control(); 
+      @if (c) {
       <div class="form-control">
-         <label for="name">Name</label>
-         <input type="text" [formControl]="c" name="name" />
+         <label for="email">Email</label>
+         <input type="email" [formControl]="c" name="email" />
          <form-signal-preview [form]="c"></form-signal-preview>
       </div>
       }
@@ -21,7 +22,7 @@ import { FormSignalPreviewComponent } from '../form-signal-preview/form-signal-p
       '[class.invalid]': 'controlSignal.invalid()',
    },
 })
-export class NameControlComponent {
+export class EmailControlComponent {
    readonly control = input<FormControl<string | null> | null>(null);
    readonly controlSignal = formSignal(this.control);
 }

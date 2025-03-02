@@ -7,7 +7,8 @@ import { FormSignalPreviewComponent } from '../form-signal-preview/form-signal-p
    standalone: true,
    imports: [FormSignalPreviewComponent],
    template: `
-      @let f = form(); @if (f) {
+      @let f = form(); 
+      @if (f) {
       <div class="form-control">
          <label>Overall Form Info</label>
          <form-signal-preview [form]="f"></form-signal-preview>

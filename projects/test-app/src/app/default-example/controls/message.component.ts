@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { formSignal } from '../../../../ngx-form-signal/src/public-api';
+import { formSignal } from '../../../../../ngx-form-signal/src/public-api';
 import { FormSignalPreviewComponent } from '../form-signal-preview/form-signal-preview.component';
 
 @Component({
@@ -8,7 +8,8 @@ import { FormSignalPreviewComponent } from '../form-signal-preview/form-signal-p
    standalone: true,
    imports: [ReactiveFormsModule, FormSignalPreviewComponent],
    template: `
-      @let c = control(); @if (c) {
+      @let c = control(); 
+      @if (c) {
       <div class="form-control">
          <label for="message">Message</label>
          <textarea [formControl]="c" name="message" rows="1"></textarea>
