@@ -1,0 +1,32 @@
+:host {
+   width: 100%;
+   .form-control {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 0.5em;
+      label {
+         font-weight: bold;
+         font-size: 0.9em;
+      }
+      input,
+      textarea {
+         width: 100%;
+      }
+   }
+
+   &.invalid {
+      .form-control {
+         label {
+            color: red;
+         }
+         input,
+         textarea {
+            border-color: red;
+            outline: none;
+         }
+      }
+   }
+}
