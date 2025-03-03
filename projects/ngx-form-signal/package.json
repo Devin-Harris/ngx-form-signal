@@ -1,6 +1,6 @@
 {
    "name": "ngx-form-signal",
-   "version": "1.18.0",
+   "version": "1.18.1",
    "peerDependencies": {
       "@angular/common": "^18.2.0",
       "@angular/core": "^18.2.0",
@@ -9,5 +9,24 @@
    "dependencies": {
       "tslib": "^2.3.0"
    },
+   "description": "Signal based form api",
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/Devin-Harris/ngx-form-signal.git"
+   },
+   "keywords": [
+      "ngx",
+      "state",
+      "signal",
+      "angular",
+      "form",
+      "forms"
+   ],
+   "author": "Devin Harris",
+   "license": "ISC",
+   "bugs": {
+      "url": "https://github.com/Devin-Harris/ngx-form-signal/issues"
+   },
+   "homepage": "https://github.com/Devin-Harris/ngx-form-signal#readme",
    "sideEffects": false
 }
