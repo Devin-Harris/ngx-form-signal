@@ -12,7 +12,7 @@ import { FormSignalSnapshotComponent } from './form-signal-snapshot.component';
       @if (f) { 
          @let show = showPreview(); 
          @if(show) {
-            <form-signal-snapshot [form]="f"></form-signal-snapshot>
+            <!-- <form-signal-snapshot [form]="f"></form-signal-snapshot> -->
          }
 
          <div class="actions">
