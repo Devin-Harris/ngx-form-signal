@@ -14,7 +14,6 @@ export type FormSignalOptions<T = any> = {
    equalityFns?: Partial<FormSignalEqualityOptions<T>>;
 };
 
-export const defaultFormSignalOptions: FormSignalOptions = {};
 export function buildDefaultFormSignalOptions<T = any>(): FormSignalOptions<T> {
-   return structuredClone(defaultFormSignalOptions);
+   return {};
 }

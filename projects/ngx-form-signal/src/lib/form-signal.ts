@@ -4,6 +4,7 @@ import {
    Signal,
    signal,
 } from '@angular/core';
+import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { buildFormDirtySignal } from './helpers/form-dirty-signal';
 import { buildFormErrorSignal } from './helpers/form-error-signal';
 import { buildFormSnapshotSignal } from './helpers/form-snapshot-signal';
@@ -14,7 +15,11 @@ import {
    buildDefaultFormSignalOptions,
    FormSignalOptions,
 } from './types/form-signal-options';
-import { FormSignal, FormSignalState } from './types/form-signal-type';
+import {
+   DeepFormSignal,
+   FormSignal,
+   FormSignalState,
+} from './types/form-signal-type';
 import { OptionalFormFromType } from './types/form-type';
 
 export function formSignal<T = any>(
@@ -72,4 +77,54 @@ export function formSignal<T = any>(
    Object.setPrototypeOf(formSignalObj, formSignals);
 
    return formSignalObj;
+}
+
+export function deepFormSignal<T = any>(
+   form: Signal<OptionalFormFromType<T>> | OptionalFormFromType<T>,
+   options: FormSignalOptions = buildDefaultFormSignalOptions<T>()
+): DeepFormSignal<T> {
+   const root: DeepFormSignal<T> = formSignal<T>(
+      form,
+      options
+   ) as DeepFormSignal<T>;
+   if (form instanceof FormControl) {
+      return root;
+   } else {
+      const f = isSignal(form) ? form() : form;
+      if (f) {
+         let children: DeepFormSignal<T>['children'] | null = null;
+         if (f instanceof FormArray) {
+            const controls = f.controls as (FormControl | FormGroup)[];
+            children = controls.reduce(
+               (acc, c, i) => {
+                  // @ts-ignore
+                  acc[i] = deepFormSignal(c, options);
+                  return acc;
+               },
+               {} as DeepFormSignal<T>['children']
+            );
+         } else if (f instanceof FormGroup) {
+            const controls = f.controls;
+            children = Object.keys(controls).reduce(
+               (acc, cKey) => {
+                  // @ts-ignore
+                  const control = controls[cKey] as
+                     | FormControl
+                     | FormGroup
+                     | FormArray;
+                  // @ts-ignore
+                  acc[cKey] = deepFormSignal(control, options);
+                  return acc;
+               },
+               {} as DeepFormSignal<T>['children']
+            );
+         }
+
+         if (children) {
+            root.children = children;
+         }
+      }
+   }
+
+   return root;
 }

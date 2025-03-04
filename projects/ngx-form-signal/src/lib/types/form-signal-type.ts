@@ -1,8 +1,10 @@
+import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { buildFormDirtySignal } from '../helpers/form-dirty-signal';
 import { buildFormErrorSignal } from '../helpers/form-error-signal';
 import { buildFormStatusSignal } from '../helpers/form-status-signal';
 import { buildFormTouchedSignal } from '../helpers/form-touched-signal';
 import { buildFormValueSignal } from '../helpers/form-value-signal';
+import { FormFromType } from './form-type';
 
 export type FormSignalSubscriptionsState<T = any> = {
    valueChangeSubscription: ReturnType<
@@ -66,3 +68,41 @@ export type FormSnapshotSignalState<T = any> = {
 
 export type FormSignal<T = any> = FormSignalState<T> &
    (() => FormSnapshotSignalState<T>);
+
+type DeepFormSignalNestedHelper<T, K> = FormFromType<T> extends
+   | FormGroup
+   | FormArray
+   ? K extends keyof FormFromType<T>['controls']
+      ? FormFromType<T>['controls'][K] extends FormControl
+         ? FormSignal<FormFromType<T>['controls'][K]['value']>
+         : FormFromType<T>['controls'][K] extends FormGroup
+           ? DeepFormSignal<FormFromType<T>['controls'][K]['controls']>
+           : FormFromType<T>['controls'][K] extends FormArray
+             ? DeepFormSignal<FormFromType<T>['controls'][K]['controls']>
+             : never
+      : never
+   : never;
+
+export type DeepFormSignal<T = any> = FormSignal<T> &
+   (FormFromType<T> extends FormControl
+      ? never
+      : {
+           children: FormFromType<T> extends FormControl
+              ? FormSignal<T>
+              : FormFromType<T> extends FormGroup
+                ? FormFromType<T>['controls'] extends Array<any>
+                   ? {
+                        [K: number]: DeepFormSignalNestedHelper<T, number>;
+                     }
+                   : {
+                        [K in keyof FormFromType<T>['controls']]: DeepFormSignalNestedHelper<
+                           T,
+                           K
+                        >;
+                     }
+                : FormFromType<T> extends FormArray
+                  ? {
+                       [K: number]: DeepFormSignalNestedHelper<T, number>;
+                    }
+                  : never;
+        });
