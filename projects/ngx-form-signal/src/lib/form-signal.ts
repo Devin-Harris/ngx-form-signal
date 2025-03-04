@@ -79,6 +79,7 @@ export function formSignal<T = any>(
    return formSignalObj;
 }
 
+// TODO: Cleanup ts-ignores and add recursive snapshots for deep signals
 export function deepFormSignal<T = any>(
    form: Signal<OptionalFormFromType<T>> | OptionalFormFromType<T>,
    options: FormSignalOptions = buildDefaultFormSignalOptions<T>()
