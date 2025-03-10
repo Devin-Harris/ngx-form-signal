@@ -14,7 +14,6 @@ export type FormFromType<T> = T extends { [K in keyof T]: AbstractControl<any> }
        : FormControl<T>;
 
 export type OptionalFormFromType<T = any> =
-   | (T extends { [K in keyof T]: AbstractControl<any> } ? FormGroup<T> : never)
+   | FormFromType<T>
    | FormControl<T>
-   | (T extends AbstractControl<any> ? FormArray<T> : never)
    | null;

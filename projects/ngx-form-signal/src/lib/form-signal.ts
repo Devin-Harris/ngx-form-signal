@@ -88,42 +88,29 @@ export function deepFormSignal<T = any>(
       form,
       options
    ) as DeepFormSignal<T>;
-   if (form instanceof FormControl) {
-      return root;
-   } else {
-      const f = isSignal(form) ? form() : form;
-      if (f) {
-         let children: DeepFormSignal<T>['children'] | null = null;
-         if (f instanceof FormArray) {
-            const controls = f.controls as (FormControl | FormGroup)[];
-            children = controls.reduce(
-               (acc, c, i) => {
-                  // @ts-ignore
-                  acc[i] = deepFormSignal(c, options);
-                  return acc;
-               },
-               {} as DeepFormSignal<T>['children']
-            );
-         } else if (f instanceof FormGroup) {
-            const controls = f.controls;
-            children = Object.keys(controls).reduce(
-               (acc, cKey) => {
-                  // @ts-ignore
-                  const control = controls[cKey] as
-                     | FormControl
-                     | FormGroup
-                     | FormArray;
-                  // @ts-ignore
-                  acc[cKey] = deepFormSignal(control, options);
-                  return acc;
-               },
-               {} as DeepFormSignal<T>['children']
-            );
-         }
 
-         if (children) {
-            root.children = children;
-         }
+   const formVal = isSignal(form) ? form() : form;
+   if (formVal && !(formVal instanceof FormControl)) {
+      let children: DeepFormSignal<T>['children'] | null = null;
+
+      if (formVal instanceof FormArray) {
+         // @ts-ignore
+         children = formVal.controls.map((c) => deepFormSignal(c, options));
+      } else if (formVal instanceof FormGroup) {
+         const controls = formVal.controls;
+         const keys = Object.keys(controls);
+         children = keys.reduce(
+            (acc, cKey) => {
+               // @ts-ignore
+               acc[cKey] = deepFormSignal(controls[cKey], options);
+               return acc;
+            },
+            {} as DeepFormSignal<T>['children']
+         );
+      }
+
+      if (children) {
+         root.children = children;
       }
    }
 

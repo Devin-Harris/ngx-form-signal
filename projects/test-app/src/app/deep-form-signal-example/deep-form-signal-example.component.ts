@@ -1,6 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Component, computed, effect } from '@angular/core';
+import {
+   FormControl,
+   FormGroup,
+   ReactiveFormsModule,
+   Validators,
+} from '@angular/forms';
 import { deepFormSignal } from '../../../../ngx-form-signal/src/public-api';
 
 @Component({
@@ -8,7 +13,7 @@ import { deepFormSignal } from '../../../../ngx-form-signal/src/public-api';
    standalone: true,
    templateUrl: './deep-form-signal-example.component.html',
    styleUrl: './deep-form-signal-example.component.scss',
-   imports: [CommonModule],
+   imports: [CommonModule, ReactiveFormsModule],
 })
 export class DeepFormSignalExampleComponent {
    readonly form = new FormGroup({
@@ -29,18 +34,35 @@ export class DeepFormSignalExampleComponent {
    readonly preview = computed(() => {
       return { ...this.formSignal(), subscriptions: null };
    });
-   // readonly preview2 = effect(() => {
-   //    const c = this.formSignal.children
-   //    if (c) {
-   //       console.log(c)
-   //    }
 
-   // });
-
-   constructor() {
-      const c = this.formSignal.children;
-      if (c) {
-         console.log(c);
-      }
-   }
+   readonly addressEffect = effect(() => {
+      console.log('address:', this.formSignal.children.address.value());
+   });
+   readonly addressStateEffect = effect(() => {
+      console.log(
+         'address state:',
+         this.formSignal.children.address.children.state.value()
+      );
+   });
+   readonly addressStreetEffect = effect(() => {
+      console.log(
+         'address street:',
+         this.formSignal.children.address.children.street.value()
+      );
+   });
+   readonly addressZipEffect = effect(() => {
+      console.log(
+         'address zip:',
+         this.formSignal.children.address.children.zip.value()
+      );
+   });
+   readonly emailEffect = effect(() => {
+      console.log('email:', this.formSignal.children.email.value());
+   });
+   readonly messageEffect = effect(() => {
+      console.log('message:', this.formSignal.children.message.value());
+   });
+   readonly nameEffect = effect(() => {
+      console.log('name:', this.formSignal.children.name.value());
+   });
 }
