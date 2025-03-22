@@ -9,9 +9,15 @@ export type FormSignalEqualityOptions<T = any> = {
    statusEquality: ValueEqualityFn<FormControlStatus | null>;
    errorsEquality: ValueEqualityFn<ValidationErrors | null>;
 };
+
 export type FormSignalOptions<T = any> = {
    injector?: Injector;
    equalityFns?: Partial<FormSignalEqualityOptions<T>>;
+};
+
+export type DeepFormSignalOptions<T = any> = {
+   injector?: Injector;
+   equalityFns?: Partial<Omit<FormSignalEqualityOptions<T>, 'valueEquality'>>;
 };
 
 export function buildDefaultFormSignalOptions<T = any>(): FormSignalOptions<T> {

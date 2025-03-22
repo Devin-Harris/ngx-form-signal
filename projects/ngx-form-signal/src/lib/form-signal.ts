@@ -4,7 +4,6 @@ import {
    Signal,
    signal,
 } from '@angular/core';
-import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { buildFormDirtySignal } from './helpers/form-dirty-signal';
 import { buildFormErrorSignal } from './helpers/form-error-signal';
 import { buildFormSnapshotSignal } from './helpers/form-snapshot-signal';
@@ -15,16 +14,12 @@ import {
    buildDefaultFormSignalOptions,
    FormSignalOptions,
 } from './types/form-signal-options';
-import {
-   DeepFormSignal,
-   FormSignal,
-   FormSignalState,
-} from './types/form-signal-type';
+import { FormSignal, FormSignalState } from './types/form-signal-type';
 import { OptionalFormFromType } from './types/form-type';
 
 export function formSignal<T = any>(
    form: Signal<OptionalFormFromType<T>> | OptionalFormFromType<T>,
-   options: FormSignalOptions = buildDefaultFormSignalOptions<T>()
+   options: FormSignalOptions<T> = buildDefaultFormSignalOptions<T>()
 ): FormSignal<T> {
    const formAsSignal = isSignal(form) ? form : signal(form);
    if (!options.injector) {
@@ -77,42 +72,4 @@ export function formSignal<T = any>(
    Object.setPrototypeOf(formSignalObj, formSignals);
 
    return formSignalObj;
-}
-
-// TODO: Cleanup ts-ignores and add recursive snapshots for deep signals
-export function deepFormSignal<T = any>(
-   form: Signal<OptionalFormFromType<T>> | OptionalFormFromType<T>,
-   options: FormSignalOptions = buildDefaultFormSignalOptions<T>()
-): DeepFormSignal<T> {
-   const root: DeepFormSignal<T> = formSignal<T>(
-      form,
-      options
-   ) as DeepFormSignal<T>;
-
-   const formVal = isSignal(form) ? form() : form;
-   if (formVal && !(formVal instanceof FormControl)) {
-      let children: DeepFormSignal<T>['children'] | null = null;
-
-      if (formVal instanceof FormArray) {
-         // @ts-ignore
-         children = formVal.controls.map((c) => deepFormSignal(c, options));
-      } else if (formVal instanceof FormGroup) {
-         const controls = formVal.controls;
-         const keys = Object.keys(controls);
-         children = keys.reduce(
-            (acc, cKey) => {
-               // @ts-ignore
-               acc[cKey] = deepFormSignal(controls[cKey], options);
-               return acc;
-            },
-            {} as DeepFormSignal<T>['children']
-         );
-      }
-
-      if (children) {
-         root.children = children;
-      }
-   }
-
-   return root;
 }
