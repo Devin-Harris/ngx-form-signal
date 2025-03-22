@@ -124,7 +124,38 @@ export class SimpleExampleComponent {
 }
 ```
 
-In the above example you can see how we are driving our state computations solely off the signal primitives and we are reacting to potential changes to the form object, the forms value, and even other inputs coming into our components. This also removes the need for a lot of cleanup steps such as unsubscribing from form subscriptions or tying into lifecycle methods such as ngOnChanges.
+In the above example we are technically subscribing to the whole forms valuechanges which is slightly different from the example before. You can simple update this by passing the name control to the `formSignal` helper method instead if you so choose.
+
+```typescript
+@Component({...})
+export class SimpleExampleComponent {
+   readonly form = input(
+      new FormGroup({
+         name: new FormControl('Joe Smith', { validators: Validators.required }),
+         email: new FormControl('js@someemail.com', {
+            validators: [Validators.required, Validators.email],
+         }),
+         message: new FormControl('Hello world!'),
+      })
+   );
+   // Pulling name control off in computed from main form
+   readonly nameControl = computed(() => this.form().controls.name)
+   readonly someListOfExistingNames: string[] = input([...]);
+
+   // Building form signal for just the name control
+   readonly nameControlSignal = formSignal(this.nameControl)
+
+   readonly showDuplicateNameWarning: boolean = computed(() => {
+      // Just using name controls value
+      const name = this.nameControlSignal.value()
+      return this.someListOfExistingNames().some(n => n.toLowerCase() === name.toLowerCase())
+   });
+}
+```
+
+Note you also can pass a normal form object instead of a signal wrapped form object if you have a statically defined form
+
+As you can see with this approach we are driving our state computations solely off the signal primitives and we are reacting to potential changes to the form object, the forms value, and even other inputs coming into our components. This also removes the need for a lot of cleanup steps such as unsubscribing from form subscriptions or tying into lifecycle methods such as ngOnChanges.
 
 Of course the compnents formSignal object has many other signal fields you can utilize as well.
 

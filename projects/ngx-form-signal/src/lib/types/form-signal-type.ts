@@ -1,3 +1,4 @@
+import { Signal } from '@angular/core';
 import { buildFormDirtySignal } from '../helpers/form-dirty-signal';
 import { buildFormErrorSignal } from '../helpers/form-error-signal';
 import { buildFormStatusSignal } from '../helpers/form-status-signal';
@@ -65,4 +66,4 @@ export type FormSnapshotSignalState<T = any> = {
 } & { subscriptions: FormSnapshotSignalSubscriptionsState<T> };
 
 export type FormSignal<T = any> = FormSignalState<T> &
-   (() => FormSnapshotSignalState<T>);
+   Signal<FormSnapshotSignalState<T>>;

@@ -66,10 +66,9 @@ export function formSignal<T = any>(
       },
    };
 
-   const snapshot$ = buildFormSnapshotSignal(formSignals);
-   const formSignalObj = (() => snapshot$()) as FormSignal<T>;
+   const snapshot$ = buildFormSnapshotSignal(formSignals) as FormSignal<T>;
 
-   Object.setPrototypeOf(formSignalObj, formSignals);
+   Object.setPrototypeOf(snapshot$, formSignals);
 
-   return formSignalObj;
+   return snapshot$;
 }
