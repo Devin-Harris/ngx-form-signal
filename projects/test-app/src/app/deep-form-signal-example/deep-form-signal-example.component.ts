@@ -41,6 +41,10 @@ export class DeepFormSignalExampleComponent {
 
    changeHistory: { type: string; value: any; timestamp: Date }[] = [];
 
+   readonly anyChangeEffect = effect(() => {
+      console.log(this.deepFormSignal());
+   });
+
    readonly addressEffect = effect(() => {
       this.changeHistory.unshift({
          type: 'address',

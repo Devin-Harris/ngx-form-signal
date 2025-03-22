@@ -12,7 +12,6 @@ The goal of NgxFormSignal is to allow easy conversion from existing form objects
 -  [Basic Concepts](#basics)
 -  [Usage](#usage)
    -  [Simple Example](#simple)
-   -  [Form Array Example](#formArray)
    -  [Deep Form Signal Example](#deepFormSignal)
 -  [Issues](#issues)
 
@@ -198,17 +197,69 @@ export class SimpleExampleComponent {
 }
 ```
 
-<a name="formArray"/>
-
-### Form Array example
-
-...
-
 <a name="deepFormSignal"/>
 
 ### Deep Form Signal example
 
-...
+This library also supports recursively creating form signals for a more nested form using the `deepFormSignal` method. This method, like `formSignal`, takes in a form or signal wrapped form and build a `formSignal` for each FormControl, FormGroup, and FormArray in the form. FormGroups and FormArrays then get an additional `children` property added to them which have the nested formsignals of their children controls. This is useful for when you have a form object with many levels and want to create form signals for many/all of those levels with a single function call.
+
+Heres a quick example on how this looks:
+
+```typescript
+@Component({...})
+export class DeepFormSignalExampleComponent {
+   /**
+    * Notice how the form and someListOfExistingNames are now input signals,
+    * This will illustrate how if these are defined outside our component
+    * we can easily react to changes of them in our showDuplicateNameWarning derivation
+    */
+   readonly form = input(
+      new FormGroup({
+         name: new FormControl('Joe Smith', { validators: Validators.required }),
+         email: new FormControl('js@someemail.com', {
+            validators: [Validators.required, Validators.email],
+         }),
+         message: new FormControl('Hello world!'),
+         address: new FormGroup({
+            street: new FormControl(''),
+            state: new FormControl(''),
+            zip: new FormControl(''),
+         }),
+      })
+   );
+
+   /**
+    * Notice how we are using deepFormSignal instead of formSignal
+    * This will create a form signal for the name, email, message, address, street, state, and zip controls/groups
+    * defined above and add the street, state, zip formsignals to the address DeepFormSignals children array
+    */
+   readonly deepFormSignal = deepFormSignal(this.form)
+
+   readonly addressEffect = effect(() => {
+      console.log(this.deepFormSignal.children.address.value())
+   });
+   readonly addressStateEffect = effect(() => {
+      console.log(this.deepFormSignal.children.address.children.state.value())
+   });
+   readonly addressStreetEffect = effect(() => {
+      console.log(this.deepFormSignal.children.address.children.street.value())
+   });
+   readonly addressZipEffect = effect(() => {
+      console.log(this.deepFormSignal.children.address.children.zip.value())
+   });
+   readonly emailEffect = effect(() => {
+      console.log(this.deepFormSignal.children.email.value())
+   });
+   readonly messageEffect = effect(() => {
+      console.log(this.deepFormSignal.children.message.value())
+   });
+   readonly nameEffect = effect(() => {
+      console.log(this.deepFormSignal.children.name.value())
+   });
+}
+```
+
+The one caveat with the deepformsignal is in the options equalityFns input. In a normal formSignal you can define the valueEqualityFn which will determine when the underlying value and rawValue signals have actually changed and attempt to notify dependent signals. In a deep signal this option is not available as the valueEqualityFn is based on a different type for each formSignal created, so defining a single one for the overall deepFormSignal and passing that down to each internal formSignal does not make sense. Note for this complex fields such as touched, dirty, etc... the deepFormSignal still allows equalityFns for these, and setting them will override them for all the touched, dirty, etc... signals on all the internal formSignals created.
 
 <a name="issues"/>
 
