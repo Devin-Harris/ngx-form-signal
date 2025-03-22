@@ -39,34 +39,55 @@ export class DeepFormSignalExampleComponent {
       return { ...this.formSignal(), subscriptions: null };
    });
 
+   changeHistory: { type: string; value: any; timestamp: Date }[] = [];
+
    readonly addressEffect = effect(() => {
-      console.log('address:', this.deepFormSignal.children.address.value());
+      this.changeHistory.unshift({
+         type: 'address',
+         value: this.deepFormSignal.children.address.value(),
+         timestamp: new Date(Date.now()),
+      });
    });
    readonly addressStateEffect = effect(() => {
-      console.log(
-         'address state:',
-         this.deepFormSignal.children.address.children.state.value()
-      );
+      this.changeHistory.unshift({
+         type: 'address.state',
+         value: this.deepFormSignal.children.address.children.state.value(),
+         timestamp: new Date(Date.now()),
+      });
    });
    readonly addressStreetEffect = effect(() => {
-      console.log(
-         'address street:',
-         this.deepFormSignal.children.address.children.street.value()
-      );
+      this.changeHistory.unshift({
+         type: 'address.street',
+         value: this.deepFormSignal.children.address.children.street.value(),
+         timestamp: new Date(Date.now()),
+      });
    });
    readonly addressZipEffect = effect(() => {
-      console.log(
-         'address zip:',
-         this.deepFormSignal.children.address.children.zip.value()
-      );
+      this.changeHistory.unshift({
+         type: 'address.zip',
+         value: this.deepFormSignal.children.address.children.zip.value(),
+         timestamp: new Date(Date.now()),
+      });
    });
    readonly emailEffect = effect(() => {
-      console.log('email:', this.deepFormSignal.children.email.value());
+      this.changeHistory.unshift({
+         type: 'email',
+         value: this.deepFormSignal.children.email.value(),
+         timestamp: new Date(Date.now()),
+      });
    });
    readonly messageEffect = effect(() => {
-      console.log('message:', this.deepFormSignal.children.message.value());
+      this.changeHistory.unshift({
+         type: 'message',
+         value: this.deepFormSignal.children.message.value(),
+         timestamp: new Date(Date.now()),
+      });
    });
    readonly nameEffect = effect(() => {
-      console.log('name:', this.deepFormSignal.children.name.value());
+      this.changeHistory.unshift({
+         type: 'name',
+         value: this.deepFormSignal.children.name.value(),
+         timestamp: new Date(Date.now()),
+      });
    });
 }
