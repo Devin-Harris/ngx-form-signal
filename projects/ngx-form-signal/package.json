@@ -1,6 +1,6 @@
 {
    "name": "ngx-form-signal",
-   "version": "1.18.2",
+   "version": "1.18.3",
    "peerDependencies": {
       "@angular/common": ">=18.0.0",
       "@angular/core": ">=18.0.0",
