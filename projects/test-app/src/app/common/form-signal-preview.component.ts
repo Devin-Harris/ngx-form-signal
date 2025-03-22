@@ -2,12 +2,17 @@ import { CommonModule } from '@angular/common';
 import { Component, input, signal } from '@angular/core';
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { FormSignalSnapshotComponent } from './form-signal-snapshot.component';
+import { FormSignalPreviewActionsComponent } from './form-signal-preview-actions.component';
 
 @Component({
-   selector: 'form-signal-preview',
-   standalone: true,
-   imports: [CommonModule, FormSignalSnapshotComponent],
-   template: `
+  selector: 'form-signal-preview',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormSignalPreviewActionsComponent,
+    FormSignalSnapshotComponent,
+  ],
+  template: `
       @let f = form(); 
       @if (f) { 
          @let show = showPreview(); 
@@ -15,24 +20,10 @@ import { FormSignalSnapshotComponent } from './form-signal-snapshot.component';
             <form-signal-snapshot [form]="f"></form-signal-snapshot>
          }
 
-         <div class="actions">
-            <button (click)="f.disabled ? f.enable() : f.disable()">
-               {{ f.disabled ? 'Enable' : 'Disable' }}
-            </button>
-            <button (click)="f.dirty ? f.markAsPristine() : f.markAsDirty()">
-               {{ f.dirty ? 'Mark as pristine' : 'Mark as dirty' }}
-            </button>
-            <button (click)="f.touched ? f.markAsUntouched() : f.markAsTouched()">
-               {{ f.touched ? 'Mark as untouched' : 'Mark as touched' }}
-            </button>
-            <button (click)="setError()">
-               {{ f.errors ? 'Clear errors' : 'Set errors' }}
-            </button>
-            <button (click)="toggle()">{{ show ? 'Hide' : 'Show' }} Info</button>
-         </div>
+         <form-signal-preview-actions [form]="f"></form-signal-preview-actions>
       }
    `,
-   styles: `
+  styles: `
    :host {
       width: 100%;
       .actions {
@@ -47,18 +38,7 @@ import { FormSignalSnapshotComponent } from './form-signal-snapshot.component';
    `,
 })
 export class FormSignalPreviewComponent {
-   readonly form = input<FormControl | FormGroup | FormArray | null>(null);
+  readonly form = input<FormControl | FormGroup | FormArray | null>(null);
 
-   readonly showPreview = signal(true);
-
-   toggle() {
-      this.showPreview.update((s) => !s);
-   }
-
-   setError() {
-      const form = this.form();
-      if (form) {
-         form.setErrors(form.errors ? null : { someError: true });
-      }
-   }
+  readonly showPreview = input(true);
 }

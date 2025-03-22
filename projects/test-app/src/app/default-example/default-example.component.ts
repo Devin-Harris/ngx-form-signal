@@ -5,6 +5,7 @@ import { EmailControlComponent } from './controls/email.component';
 import { FormInfoComponent } from './controls/form.component';
 import { MessageControlComponent } from './controls/message.component';
 import { NameControlComponent } from './controls/name.component';
+import { DefaultTableComponent } from './table/default-table.component';
 
 @Component({
    selector: 'default-example',
@@ -14,6 +15,7 @@ import { NameControlComponent } from './controls/name.component';
       NameControlComponent,
       MessageControlComponent,
       EmailControlComponent,
+      DefaultTableComponent,
    ],
    templateUrl: './default-example.component.html',
    styleUrl: './default-example.component.scss',
@@ -28,6 +30,15 @@ export class DefaultExampleComponent {
    });
 
    readonly formSignal = formSignal(this.form);
+   readonly nameSignal = formSignal(this.form.controls.name);
+   readonly emailSignal = formSignal(this.form.controls.email);
+   readonly messageSignal = formSignal(this.form.controls.message);
+   readonly signals = [
+      { signal: this.formSignal, key: 'form' },
+      { signal: this.nameSignal, key: 'name' },
+      { signal: this.emailSignal, key: 'email' },
+      { signal: this.messageSignal, key: 'message' },
+   ];
 
    readonly derivedValue = computed(() => {
       const value = this.formSignal.value();

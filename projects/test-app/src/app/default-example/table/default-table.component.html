@@ -1,0 +1,40 @@
+
+<table>
+   <thead>
+      <th>Control</th>
+      <th>Value</th>
+      <th>Raw Value</th>
+      <th>Status</th>
+      <th>Touched</th>
+      <th>Untouched</th>
+      <th>Dirty</th>
+      <th>Pristine</th>
+      <th>Disabled</th>
+      <th>Enabled</th>
+      <th>Pending</th>
+      <th>Valid</th>
+      <th>Invalid</th>
+      <th>Errors</th>
+   </thead>
+   <tbody>
+      @for (obj of signals; track obj.key) {
+         @let s = obj.signal();
+         <tr>
+            <td>{{ obj.key }}</td>
+            <td><pre>{{ s.value | json }}</pre></td>
+            <td><pre>{{ s.rawValue | json }}</pre></td>
+            <td><pre>{{ s.status | json }}</pre></td>
+            <td><pre>{{ s.touched | json }}</pre></td>
+            <td><pre>{{ s.untouched | json }}</pre></td>
+            <td><pre>{{ s.dirty | json }}</pre></td>
+            <td><pre>{{ s.pristine | json }}</pre></td>
+            <td><pre>{{ s.disabled | json }}</pre></td>
+            <td><pre>{{ s.enabled | json }}</pre></td>
+            <td><pre>{{ s.pending | json }}</pre></td>
+            <td><pre>{{ s.valid | json }}</pre></td>
+            <td><pre>{{ s.invalid | json }}</pre></td>
+            <td><pre>{{ s.errors | json }}</pre></td>
+         </tr>
+      }
+   </tbody>
+</table>
