@@ -1,6 +1,6 @@
 {
    "name": "ngx-form-signal",
-   "version": "1.18.3",
+   "version": "2.18.0",
    "peerDependencies": {
       "@angular/common": ">=18.0.0",
       "@angular/core": ">=18.0.0",
@@ -18,9 +18,11 @@
       "ngx",
       "state",
       "signal",
+      "signals",
       "angular",
       "form",
-      "forms"
+      "forms",
+      "reactive"
    ],
    "author": "Devin Harris",
    "license": "ISC",
