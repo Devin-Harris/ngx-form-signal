@@ -1,46 +1,39 @@
-import { computed, effect, Signal, signal, untracked } from '@angular/core';
-import { PristineChangeEvent } from '@angular/forms';
-import { filter, Subscription } from 'rxjs';
+import { computed, signal, Signal } from '@angular/core';
+import { AbstractControl, PristineChangeEvent } from '@angular/forms';
+import { filter, map, Observable, of } from 'rxjs';
 import { FormSignalOptions } from '../types/form-signal-options';
-import { OptionalFormFromType } from '../types/form-type';
+import { handleStreamSignal } from './handle-stream-signal';
 
-export function buildFormDirtySignal(
-   formAsSignal: Signal<OptionalFormFromType<any>>,
+export function buildFormDirtySignal<T extends AbstractControl<any>>(
+   formAsSignal: Signal<T | null>,
    options: FormSignalOptions
 ) {
-   const dirty$ = signal<boolean>(!!formAsSignal()?.dirty, {
-      equal: options.equalityFns?.dirtyEquality,
+   const dirty$ = signal<boolean>(false, {
+      equal: options.eagerNotify ? () => false : undefined,
    });
-   const dirtyChangeSubscription$ = signal<Subscription | null>(null);
+   const pristine$ = computed(() => !dirty$(), {
+      equal: options.eagerNotify ? () => false : undefined,
+   });
 
-   const formDirtyChangeEffect = effect(
-      (onCleanup: Function) => {
-         const form = formAsSignal();
-         untracked(() => {
-            const setDirty = () => {
-               untracked(() => {
-                  dirty$.set(!!form?.dirty);
-               });
-            };
+   const formStream$ = computed<{
+      form: T | null;
+      stream: Observable<boolean>;
+   }>(() => {
+      const form = formAsSignal();
+      const dirtyStream = form?.events.pipe(
+         filter((e) => e instanceof PristineChangeEvent),
+         map(() => !!form.dirty)
+      );
+      return { form, stream: dirtyStream ? dirtyStream : of(false) };
+   });
 
-            dirtyChangeSubscription$()?.unsubscribe();
-            dirtyChangeSubscription$.set(
-               form?.events
-                  .pipe(filter((e) => e instanceof PristineChangeEvent))
-                  .subscribe((e) => {
-                     setDirty();
-                  }) ?? null
-            );
-            setDirty();
-         });
-         onCleanup(
-            () => untracked(() => dirtyChangeSubscription$())?.unsubscribe()
-         );
+   handleStreamSignal(
+      formStream$,
+      (form) => {
+         dirty$.set(!!form?.dirty);
       },
-      { injector: options.injector }
+      options
    );
 
-   const pristine$ = computed(() => !dirty$());
-
-   return { dirty$, pristine$, dirtyChangeSubscription$ };
+   return { dirty$: dirty$.asReadonly(), pristine$ };
 }

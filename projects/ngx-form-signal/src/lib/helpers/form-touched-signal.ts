@@ -1,48 +1,39 @@
-import { computed, effect, Signal, signal, untracked } from '@angular/core';
-import { TouchedChangeEvent } from '@angular/forms';
-import { filter, Subscription } from 'rxjs';
+import { computed, signal, Signal } from '@angular/core';
+import { AbstractControl, TouchedChangeEvent } from '@angular/forms';
+import { filter, map, Observable, of } from 'rxjs';
 import { FormSignalOptions } from '../types/form-signal-options';
-import { OptionalFormFromType } from '../types/form-type';
+import { handleStreamSignal } from './handle-stream-signal';
 
-export function buildFormTouchedSignal(
-   formAsSignal: Signal<OptionalFormFromType<any>>,
+export function buildFormTouchedSignal<T extends AbstractControl<any>>(
+   formAsSignal: Signal<T | null>,
    options: FormSignalOptions
 ) {
-   const touched$ = signal<boolean>(!!formAsSignal()?.touched, {
-      equal: options.equalityFns?.touchedEquality,
+   const touched$ = signal<boolean>(false, {
+      equal: options.eagerNotify ? () => false : undefined,
    });
-   const touchedChangeSubscription$ = signal<Subscription | null>(null);
+   const untouched$ = computed(() => !touched$(), {
+      equal: options.eagerNotify ? () => false : undefined,
+   });
 
-   const formTouchedChangeEffect = effect(
-      (onCleanup: Function) => {
-         const form = formAsSignal();
-         untracked(() => {
-            const setTouched = () => {
-               untracked(() => {
-                  touched$.set(!!form?.touched);
-               });
-            };
+   const formStream$ = computed<{
+      form: T | null;
+      stream: Observable<boolean>;
+   }>(() => {
+      const form = formAsSignal();
+      const touchedStream = form?.events.pipe(
+         filter((e) => e instanceof TouchedChangeEvent),
+         map(() => !!form.touched)
+      );
+      return { form, stream: touchedStream ? touchedStream : of(false) };
+   });
 
-            touchedChangeSubscription$()?.unsubscribe();
-            touchedChangeSubscription$.set(
-               form?.events
-                  .pipe(filter((e) => e instanceof TouchedChangeEvent))
-                  .subscribe((e) => {
-                     setTouched();
-                  }) ?? null
-            );
-            setTouched();
-         });
-         onCleanup(
-            () => untracked(() => touchedChangeSubscription$())?.unsubscribe()
-         );
+   handleStreamSignal(
+      formStream$,
+      (form) => {
+         touched$.set(!!form?.touched);
       },
-      { injector: options.injector }
+      options
    );
 
-   const untouched$ = computed(() => !touched$(), {
-      equal: options.equalityFns?.touchedEquality,
-   });
-
-   return { touched$, untouched$, touchedChangeSubscription$ };
+   return { touched$: touched$.asReadonly(), untouched$ };
 }
