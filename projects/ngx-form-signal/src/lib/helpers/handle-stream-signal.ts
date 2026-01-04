@@ -9,7 +9,7 @@ export function handleStreamSignal<T extends AbstractControl<any>, StreamValue>(
    options: FormSignalOptions
 ) {
    let streamSubscription: Subscription | null = null;
-   effect(
+   return effect(
       (onCleanup: Function) => {
          const { form, stream } = formStream();
          untracked(() => {

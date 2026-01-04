@@ -22,14 +22,14 @@ export function buildFormErrorSignal<T extends AbstractControl<any>>(
       stream: Observable<any>;
    }>(() => {
       const form = formAsSignal();
-      const statusStream = form?.events.pipe(
+      const errorStream = form?.events.pipe(
          filter(
             (e) =>
                e instanceof StatusChangeEvent || e instanceof ValueChangeEvent
          ),
          map(() => form.errors)
       );
-      return { form, stream: statusStream ? statusStream : of(null) };
+      return { form, stream: errorStream ? errorStream : of(null) };
    });
 
    handleStreamSignal(
