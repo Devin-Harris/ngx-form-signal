@@ -15,20 +15,24 @@ import { buildFormTouchedSignal } from './helpers/form-touched-signal';
 import { buildFormValueSignal } from './helpers/form-value-signal';
 import {
    buildDefaultFormSignalOptions,
+   FormSignalForm,
+   FormSignalInput,
    FormSignalOptions,
 } from './types/form-signal-options';
 import { FormSignal, FormSignalState } from './types/form-signal-type';
 
-export function formSignal<T extends AbstractControl<any>>(
-   form: T | Signal<T | null>,
+export function formSignal<T extends FormSignalInput>(
+   form: T,
    options: FormSignalOptions = buildDefaultFormSignalOptions()
-): FormSignal<T> {
+): FormSignal<NonNullable<FormSignalForm<T>>> {
    if (!options.injector) {
       assertInInjectionContext(() => {});
       options.injector = inject(Injector);
    }
 
-   const formAsSignal = isSignal(form) ? form : signal(form).asReadonly();
+   const formAsSignal = (isSignal(form) ? form : signal(form).asReadonly()) as
+      | Signal<AbstractControl>
+      | Signal<AbstractControl | null>;
 
    const { value$, rawValue$ } = buildFormValueSignal(formAsSignal, options);
    const { status$, valid$, invalid$, pending$, disabled$, enabled$ } =
@@ -40,7 +44,7 @@ export function formSignal<T extends AbstractControl<any>>(
    const { dirty$, pristine$ } = buildFormDirtySignal(formAsSignal, options);
    const errors$ = buildFormErrorSignal(formAsSignal, options);
 
-   const formSignals: FormSignalState<T> = {
+   const formSignals: FormSignalState<NonNullable<FormSignalForm<T>>> = {
       status: status$,
       value: value$,
       rawValue: rawValue$,
@@ -59,5 +63,5 @@ export function formSignal<T extends AbstractControl<any>>(
    const snapshot$ = buildFormSnapshotSignal(formSignals);
    Object.setPrototypeOf(snapshot$, formSignals);
 
-   return snapshot$ as FormSignal<T>;
+   return snapshot$ as FormSignal<NonNullable<FormSignalForm<T>>>;
 }

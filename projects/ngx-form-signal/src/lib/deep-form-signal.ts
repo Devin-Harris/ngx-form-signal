@@ -4,22 +4,21 @@ import {
    inject,
    Injector,
    isSignal,
-   signal,
+   runInInjectionContext,
    Signal,
+   signal,
    untracked,
 } from '@angular/core';
-import { FormArray, FormGroup } from '@angular/forms';
+import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
 import { formSignal } from './form-signal';
-import {
-   DeepFormSignal,
-   DeepSignalFormInput,
-} from './types/deep-form-signal-type';
+import { DeepFormSignal } from './types/deep-form-signal-type';
 import {
    buildDefaultFormSignalOptions,
+   FormSignalInput,
    FormSignalOptions,
 } from './types/form-signal-options';
 
-export function deepFormSignal<T extends DeepSignalFormInput>(
+export function deepFormSignal<T extends FormSignalInput>(
    form: T,
    options: FormSignalOptions = buildDefaultFormSignalOptions()
 ): DeepFormSignal<T> {
@@ -28,17 +27,17 @@ export function deepFormSignal<T extends DeepSignalFormInput>(
       options.injector = inject(Injector);
    }
 
-   const formAsSignal = isSignal(form) ? form : signal(form).asReadonly();
+   const formAsSignal = (isSignal(form) ? form : signal(form).asReadonly()) as
+      | Signal<AbstractControl>
+      | Signal<AbstractControl | null>;
 
-   const root = formSignal(
-      formAsSignal as T extends Signal<infer P> ? NonNullable<P> : T,
-      options
+   const root = runInInjectionContext(options.injector, () =>
+      formSignal(formAsSignal, options)
    );
 
    Object.defineProperty(root, 'controls', {
       get: computed(() => {
          const form = formAsSignal();
-
          return untracked(() => {
             if (form instanceof FormArray) {
                return form.controls.map((c) => deepFormSignal(c, options));
