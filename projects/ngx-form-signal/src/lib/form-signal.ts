@@ -6,7 +6,6 @@ import {
    Signal,
    signal,
 } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
 import { buildFormDirtySignal } from './helpers/form-dirty-signal';
 import { buildFormErrorSignal } from './helpers/form-error-signal';
 import { buildFormSnapshotSignal } from './helpers/form-snapshot-signal';
@@ -19,7 +18,11 @@ import {
    FormSignalInput,
    FormSignalOptions,
 } from './types/form-signal-options';
-import { FormSignal, FormSignalState } from './types/form-signal-type';
+import {
+   FORM_SIGNAL_FORM_TOKEN,
+   FormSignal,
+   FormSignalState,
+} from './types/form-signal-type';
 
 export function formSignal<T extends FormSignalInput>(
    form: T,
@@ -30,9 +33,9 @@ export function formSignal<T extends FormSignalInput>(
       options.injector = inject(Injector);
    }
 
-   const formAsSignal = (isSignal(form) ? form : signal(form).asReadonly()) as
-      | Signal<AbstractControl>
-      | Signal<AbstractControl | null>;
+   const formAsSignal = (
+      isSignal(form) ? form : signal(form).asReadonly()
+   ) as Signal<NonNullable<FormSignalForm<T>> | null>;
 
    const { value$, rawValue$ } = buildFormValueSignal(formAsSignal, options);
    const { status$, valid$, invalid$, pending$, disabled$, enabled$ } =
@@ -58,6 +61,7 @@ export function formSignal<T extends FormSignalInput>(
       disabled: disabled$,
       enabled: enabled$,
       errors: errors$,
+      [FORM_SIGNAL_FORM_TOKEN]: formAsSignal,
    };
 
    const snapshot$ = buildFormSnapshotSignal(formSignals);

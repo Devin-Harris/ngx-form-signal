@@ -1,12 +1,30 @@
-import { Injector, signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { Component, Injector, input, signal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { formSignal } from './form-signal';
 
+@Component({
+   standalone: true,
+   template: '',
+})
+class TestComponent {
+   readonly form = input.required<
+      FormGroup<{
+         name: FormControl<string>;
+      }>
+   >();
+
+   readonly fSignal = formSignal(this.form);
+}
+
 describe('formSignal Integration', () => {
    let injector: Injector;
+   let fixture: ComponentFixture<TestComponent>;
 
    beforeEach(() => {
+      TestBed.configureTestingModule({
+         imports: [TestComponent],
+      });
       injector = TestBed.inject(Injector);
    });
 
@@ -80,5 +98,34 @@ describe('formSignal Integration', () => {
       expect(fSignal.dirty()).toBe(false);
       expect(fSignal.enabled()).toBe(true);
       expect(fSignal.errors()).toBeNull();
+   });
+
+   it('should not throw when formSignal is created before ngOnInit', () => {
+      expect(() => {
+         fixture = TestBed.createComponent(TestComponent);
+      }).not.toThrow();
+   });
+
+   it('should work once the required input is set', () => {
+      fixture = TestBed.createComponent(TestComponent);
+
+      const form = new FormGroup({
+         name: new FormControl('Alice'),
+      });
+
+      // set required input
+      fixture.componentRef.setInput('form', form);
+      fixture.detectChanges();
+
+      const component = fixture.componentInstance;
+
+      // formSignal should now be fully functional
+      expect(component.fSignal.value()).toEqual({ name: 'Alice' });
+
+      // update form
+      form.controls.name.setValue('Bob');
+      TestBed.flushEffects();
+
+      expect(component.fSignal.value()).toEqual({ name: 'Bob' });
    });
 });

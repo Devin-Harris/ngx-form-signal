@@ -1,16 +1,15 @@
 import {
    assertInInjectionContext,
-   computed,
    inject,
    Injector,
    isSignal,
-   runInInjectionContext,
    Signal,
    signal,
    untracked,
 } from '@angular/core';
-import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
+import { AbstractControl } from '@angular/forms';
 import { formSignal } from './form-signal';
+import { buildFormControlsSignal } from './helpers/form-controls-signal';
 import { DeepFormSignal } from './types/deep-form-signal-type';
 import {
    buildDefaultFormSignalOptions,
@@ -27,35 +26,29 @@ export function deepFormSignal<T extends FormSignalInput>(
       options.injector = inject(Injector);
    }
 
-   const formAsSignal = (isSignal(form) ? form : signal(form).asReadonly()) as
-      | Signal<AbstractControl>
-      | Signal<AbstractControl | null>;
+   const formAsSignal = (
+      isSignal(form) ? form : signal(form).asReadonly()
+   ) as Signal<AbstractControl | null>;
 
-   const root = runInInjectionContext(options.injector, () =>
-      formSignal(formAsSignal, options)
-   );
+   const root = formSignal(formAsSignal, options);
+
+   const controls$ = buildFormControlsSignal(formAsSignal, options);
+   const controlProxy = new Proxy(controls$, {
+      get(_target, prop, receiver) {
+         const snapshot = untracked(_target);
+         if (!snapshot) return null;
+         if (prop in snapshot) {
+            return snapshot?.[prop as any];
+         }
+         return Reflect.get(_target, prop, receiver);
+      },
+      apply(_target, _thisArg, _args) {
+         return _target();
+      },
+   });
 
    Object.defineProperty(root, 'controls', {
-      get: computed(() => {
-         const form = formAsSignal();
-         return untracked(() => {
-            if (form instanceof FormArray) {
-               return form.controls.map((c) => deepFormSignal(c, options));
-            }
-
-            if (form instanceof FormGroup) {
-               return Object.keys(form.controls).reduce(
-                  (acc, key) => ({
-                     ...acc,
-                     [key]: deepFormSignal(form.controls[key], options),
-                  }),
-                  {}
-               );
-            }
-
-            return null;
-         });
-      }),
+      get: () => controlProxy,
    });
 
    return root as DeepFormSignal<T>;

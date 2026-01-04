@@ -1,22 +1,38 @@
-import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
+import { Signal } from '@angular/core';
+import {
+   AbstractControl,
+   FormArray,
+   FormGroup,
+   FormRecord,
+} from '@angular/forms';
 import { FormSignalForm, FormSignalInput } from './form-signal-options';
 import { FormSignal } from './form-signal-type';
 
-type Controls<T extends AbstractControl> = T extends FormGroup<infer C>
+type RecursiveControls<T extends AbstractControl> = T extends FormGroup<infer C>
    ? { [K in keyof C]: DeepFormSignal<C[K]> }
-   : T extends FormArray<infer U>
-     ? U extends AbstractControl
-        ? DeepFormSignal<U>[]
-        : never
-     : never;
+   : T extends FormRecord<infer C>
+     ? { [x: PropertyKey]: DeepFormSignal<C> }
+     : T extends FormArray<infer U>
+       ? U extends AbstractControl
+          ? DeepFormSignal<U>[]
+          : never
+       : never;
+
+type SignalControls<T extends AbstractControl | null> = T extends null
+   ? Signal<RecursiveControls<NonNullable<T>> | null>
+   : Signal<RecursiveControls<NonNullable<T>>>;
+
+type Controls<T extends AbstractControl | null> = T extends null
+   ? (RecursiveControls<NonNullable<T>> & SignalControls<T>) | null
+   : RecursiveControls<NonNullable<T>> & SignalControls<T>;
 
 type ControlsField<T extends AbstractControl | null> = T extends
    | FormGroup<any>
    | FormArray<any>
    | null
-   ? T extends null
-      ? { controls?: Controls<NonNullable<T>> | null }
-      : { controls: Controls<NonNullable<T>> }
+   ? {
+        controls: Controls<T>;
+     }
    : {};
 
 export type DeepFormSignal<T extends FormSignalInput> = FormSignal<
