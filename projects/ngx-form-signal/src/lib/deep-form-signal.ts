@@ -35,12 +35,12 @@ export function deepFormSignal<T extends FormSignalInput>(
    const controls$ = buildFormControlsSignal(formAsSignal, options);
    const controlProxy = new Proxy(controls$, {
       get(_target, prop, receiver) {
-         const snapshot = untracked(_target);
+         const snapshot = untracked(() => _target());
          if (!snapshot) return null;
-         if (prop in snapshot) {
-            return snapshot?.[prop as any];
-         }
-         return Reflect.get(_target, prop, receiver);
+
+         if (Array.isArray(snapshot))
+            return snapshot[prop as unknown as number];
+         return snapshot?.[prop as string];
       },
       apply(_target, _thisArg, _args) {
          return _target();
