@@ -91,6 +91,42 @@ describe('form-controls-signal (deep stability)', () => {
       expect(runs).toBe(4);
    });
 
+   it('should rerun effects when dynamically adding controls', () => {
+      const form = new FormGroup({
+         address: new FormGroup({
+            zip: new FormControl('12345'),
+         }),
+      });
+
+      const { dSignal } = setup(form);
+
+      let runs = 0;
+
+      effect(
+         () => {
+            runs++;
+            dSignal.controls.address.controls().zip.value();
+         },
+         { injector }
+      );
+
+      TestBed.flushEffects();
+      expect(runs).toBe(2);
+
+      (form.controls.address as FormGroup).removeControl('zip');
+      TestBed.flushEffects();
+
+      expect(runs).toBe(3);
+
+      (form.controls.address as FormGroup).addControl(
+         'zip',
+         new FormControl('123456')
+      );
+      TestBed.flushEffects();
+
+      expect(runs).toBe(5);
+   });
+
    it('should preserve deep signal identity when controls change', () => {
       const form = new FormGroup({
          address: new FormGroup({
