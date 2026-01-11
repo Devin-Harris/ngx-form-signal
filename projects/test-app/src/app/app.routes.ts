@@ -12,11 +12,8 @@ export const routes: Routes = [
    {
       path: 'deep-form-signal',
       loadComponent: () =>
-         import(
-            './deep-form-signal-example/deep-form-signal-example.component'
-         ).then(
-            ({ DeepFormSignalExampleComponent }) =>
-               DeepFormSignalExampleComponent
+         import('./deep-form-signal-example/deep-form-signal-example.component').then(
+            ({ DeepFormSignalExampleComponent }) => DeepFormSignalExampleComponent
          ),
    },
    {
@@ -24,16 +21,6 @@ export const routes: Routes = [
       loadComponent: () =>
          import('./form-array-example/form-array-example.component').then(
             ({ FormArrayExampleComponent }) => FormArrayExampleComponent
-         ),
-   },
-   {
-      path: 'form-subscription-destroying',
-      loadComponent: () =>
-         import(
-            './form-subscription-destroying-example/form-subscription-destroying-example.component'
-         ).then(
-            ({ FormSubscriptionDestroyingExampleComponent }) =>
-               FormSubscriptionDestroyingExampleComponent
          ),
    },
 ];

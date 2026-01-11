@@ -1,44 +1,50 @@
-import { isSignal, Signal } from '@angular/core';
-import { FormArray, FormControl, FormGroup } from '@angular/forms';
+import { assertInInjectionContext, inject, Injector, isSignal, Signal, signal, untracked } from '@angular/core';
+import { AbstractControl } from '@angular/forms';
 import { formSignal } from './form-signal';
+import { buildFormControlsSignal } from './helpers/form-controls-signal';
 import { DeepFormSignal } from './types/deep-form-signal-type';
-import {
-   buildDefaultFormSignalOptions,
-   DeepFormSignalOptions,
-} from './types/form-signal-options';
-import { OptionalFormFromType } from './types/form-type';
+import { buildDefaultFormSignalOptions, FormSignalInput, FormSignalOptions } from './types/form-signal-options';
 
-export function deepFormSignal<T = any>(
-   form: Signal<OptionalFormFromType<T>> | OptionalFormFromType<T>,
-   options: DeepFormSignalOptions<T> = buildDefaultFormSignalOptions<T>()
+/**
+ * Takes a reactive form control and subscribes to various events to pull out
+ * form states and store them into signals.
+ *
+ * Creates a formSignal for each nested control inside children groups and arrays.
+ * These are made accessible over an additional `controls` property.
+ */
+export function deepFormSignal<T extends FormSignalInput>(
+   form: T,
+   options: FormSignalOptions = buildDefaultFormSignalOptions()
 ): DeepFormSignal<T> {
-   const root: DeepFormSignal<T> = formSignal<T>(
-      form,
-      options
-   ) as DeepFormSignal<T>;
-
-   const formVal = isSignal(form) ? form() : form;
-   if (formVal && !(formVal instanceof FormControl)) {
-      let children: DeepFormSignal<T>['children'] | null = null;
-
-      if (formVal instanceof FormArray) {
-         // @ts-ignore
-         children = formVal.controls.map((c) => deepFormSignal(c, options));
-      } else if (formVal instanceof FormGroup) {
-         const controls = formVal.controls;
-         const keys = Object.keys(controls);
-         children = keys.reduce(
-            (acc, cKey) => {
-               // @ts-ignore
-               acc[cKey] = deepFormSignal(controls[cKey], options);
-               return acc;
-            },
-            {} as DeepFormSignal<T>['children']
-         );
-      }
-
-      root.children = children;
+   if (!options.injector) {
+      assertInInjectionContext(() => {});
+      options.injector = inject(Injector);
    }
 
-   return root;
+   const formAsSignal = (isSignal(form) ? form : signal(form).asReadonly()) as Signal<AbstractControl | null>;
+
+   const root = formSignal(formAsSignal, options);
+
+   const controls$ = buildFormControlsSignal(formAsSignal, options);
+   const controlProxy = new Proxy(controls$, {
+      get(_target, prop, receiver) {
+         const snapshot = untracked(() => _target());
+         if (!snapshot) return null;
+
+         if (Array.isArray(snapshot)) return snapshot[prop as unknown as number];
+         return snapshot?.[prop as string];
+      },
+      apply(_target, _thisArg, _args) {
+         return _target() ?? null;
+      },
+   });
+
+   Object.defineProperty(root, 'controls', {
+      get: () => {
+         const snapshot = untracked(() => controls$());
+         return snapshot ? controlProxy : null;
+      },
+   });
+
+   return root as DeepFormSignal<T>;
 }

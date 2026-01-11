@@ -1,12 +1,8 @@
 import { computed } from '@angular/core';
-import {
-   FormSignalState,
-   FormSnapshotSignalState,
-} from '../types/form-signal-type';
+import { AbstractControl } from '@angular/forms';
+import { FormSignalState, FormSnapshotSignalState } from '../types/form-signal-type';
 
-export function buildFormSnapshotSignal<T = any>(
-   formSignalState: FormSignalState<T>
-) {
+export function buildFormSnapshotSignal<T extends AbstractControl<any>>(formSignalState: FormSignalState<T>) {
    return computed<FormSnapshotSignalState<T>>(() => {
       return {
          status: formSignalState.status(),
@@ -22,16 +18,6 @@ export function buildFormSnapshotSignal<T = any>(
          disabled: formSignalState.disabled(),
          enabled: formSignalState.enabled(),
          errors: formSignalState.errors(),
-         subscriptions: {
-            valueChangeSubscription:
-               formSignalState.subscriptions.valueChangeSubscription(),
-            statusChangeSubscription:
-               formSignalState.subscriptions.statusChangeSubscription(),
-            touchedChangeSubscription:
-               formSignalState.subscriptions.touchedChangeSubscription(),
-            dirtyChangeSubscription:
-               formSignalState.subscriptions.dirtyChangeSubscription(),
-         },
       };
    });
 }

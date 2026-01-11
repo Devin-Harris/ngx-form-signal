@@ -1,44 +1,41 @@
-import { FormArray, FormControl, FormGroup } from '@angular/forms';
+import { Signal } from '@angular/core';
+import {
+   AbstractControl,
+   FormArray,
+   FormGroup,
+   FormRecord,
+} from '@angular/forms';
+import { FormSignalForm, FormSignalInput } from './form-signal-options';
 import { FormSignal } from './form-signal-type';
-import { FormFromType } from './form-type';
 
-type DeepFormSignalNestedHelper<T, K> = FormFromType<T> extends
-   | FormGroup
-   | FormArray
-   ? K extends keyof FormFromType<T>['controls']
-      ? FormFromType<T>['controls'][K] extends FormControl
-         ? FormSignal<FormFromType<T>['controls'][K]['value']>
-         : FormFromType<T>['controls'][K] extends FormGroup
-           ? DeepFormSignal<FormFromType<T>['controls'][K]['controls']>
-           : FormFromType<T>['controls'][K] extends FormArray
-             ? DeepFormSignal<FormFromType<T>['controls'][K]['controls']>
-             : never
-      : never
-   : never;
+type RecursiveControls<T extends AbstractControl> = T extends FormGroup<infer C>
+   ? { [K in keyof C]: DeepFormSignal<C[K]> }
+   : T extends FormRecord<infer C>
+     ? { [x: PropertyKey]: DeepFormSignal<C> }
+     : T extends FormArray<infer U>
+       ? U extends AbstractControl
+          ? DeepFormSignal<U>[]
+          : never
+       : never;
 
-export type DeepFormSignalChildren<T = any> =
-   FormFromType<T> extends FormControl
-      ? FormSignal<T>
-      : FormFromType<T> extends FormGroup
-        ? FormFromType<T>['controls'] extends Array<any>
-           ? {
-                [K: number]: DeepFormSignalNestedHelper<T, number>;
-             }
-           : {
-                [K in keyof FormFromType<T>['controls']]: DeepFormSignalNestedHelper<
-                   T,
-                   K
-                >;
-             }
-        : FormFromType<T> extends FormArray
-          ? {
-               [K: number]: DeepFormSignalNestedHelper<T, number>;
-            }
-          : null;
+type SignalControls<T extends AbstractControl | null> = T extends null
+   ? Signal<RecursiveControls<NonNullable<T>> | null>
+   : Signal<RecursiveControls<NonNullable<T>>>;
 
-export type DeepFormSignal<T = any> = FormSignal<T> &
-   (FormFromType<T> extends FormControl
-      ? { children: null }
-      : {
-           children: DeepFormSignalChildren<T>;
-        });
+type Controls<T extends AbstractControl | null> = T extends null
+   ? (RecursiveControls<NonNullable<T>> & SignalControls<T>) | null
+   : RecursiveControls<NonNullable<T>> & SignalControls<T>;
+
+type ControlsField<T extends AbstractControl | null> = T extends
+   | FormGroup<any>
+   | FormArray<any>
+   | null
+   ? {
+        controls: Controls<T>;
+     }
+   : {};
+
+export type DeepFormSignal<T extends FormSignalInput> = FormSignal<
+   NonNullable<FormSignalForm<T>>
+> &
+   ControlsField<FormSignalForm<T>>;

@@ -1,9 +1,4 @@
-import {
-   assertInInjectionContext,
-   isSignal,
-   Signal,
-   signal,
-} from '@angular/core';
+import { assertInInjectionContext, inject, Injector, isSignal, Signal, signal } from '@angular/core';
 import { buildFormDirtySignal } from './helpers/form-dirty-signal';
 import { buildFormErrorSignal } from './helpers/form-error-signal';
 import { buildFormSnapshotSignal } from './helpers/form-snapshot-signal';
@@ -12,45 +7,42 @@ import { buildFormTouchedSignal } from './helpers/form-touched-signal';
 import { buildFormValueSignal } from './helpers/form-value-signal';
 import {
    buildDefaultFormSignalOptions,
+   FormSignalForm,
+   FormSignalInput,
    FormSignalOptions,
 } from './types/form-signal-options';
-import { FormSignal, FormSignalState } from './types/form-signal-type';
-import { OptionalFormFromType } from './types/form-type';
+import { FORM_SIGNAL_FORM_TOKEN, FormSignal, FormSignalState } from './types/form-signal-type';
 
-export function formSignal<T = any>(
-   form: Signal<OptionalFormFromType<T>> | OptionalFormFromType<T>,
-   options: FormSignalOptions<T> = buildDefaultFormSignalOptions<T>()
-): FormSignal<T> {
-   const formAsSignal = isSignal(form) ? form : signal(form);
+/**
+ * Takes a reactive form control and subscribes to various events to pull out
+ * form states and store them into signals.
+ */
+export function formSignal<T extends FormSignalInput>(
+   form: T,
+   options: FormSignalOptions = buildDefaultFormSignalOptions()
+): FormSignal<NonNullable<FormSignalForm<T>>> {
    if (!options.injector) {
       assertInInjectionContext(() => {});
+      options.injector = inject(Injector);
    }
-   const { value$, rawValue$, valueChangeSubscription$ } =
-      buildFormValueSignal<T>(formAsSignal, options);
-   const {
-      status$,
-      valid$,
-      invalid$,
-      pending$,
-      disabled$,
-      enabled$,
-      statusChangeSubscription$,
-   } = buildFormStatusSignal<T>(formAsSignal, options);
-   const { touched$, untouched$, touchedChangeSubscription$ } =
-      buildFormTouchedSignal(formAsSignal, options);
-   const { dirty$, pristine$, dirtyChangeSubscription$ } = buildFormDirtySignal(
-      formAsSignal,
-      options
-   );
-   const errors$ = buildFormErrorSignal(formAsSignal, value$, status$, options);
 
-   const formSignals: FormSignalState<T> = {
-      status: status$.asReadonly(),
-      value: value$.asReadonly(),
-      rawValue: rawValue$.asReadonly(),
-      touched: touched$.asReadonly(),
+   const formAsSignal = (isSignal(form) ? form : signal(form).asReadonly()) as Signal<NonNullable<
+      FormSignalForm<T>
+   > | null>;
+
+   const { value$, rawValue$ } = buildFormValueSignal(formAsSignal, options);
+   const { status$, valid$, invalid$, pending$, disabled$, enabled$ } = buildFormStatusSignal(formAsSignal, options);
+   const { touched$, untouched$ } = buildFormTouchedSignal(formAsSignal, options);
+   const { dirty$, pristine$ } = buildFormDirtySignal(formAsSignal, options);
+   const errors$ = buildFormErrorSignal(formAsSignal, options);
+
+   const formSignals: FormSignalState<NonNullable<FormSignalForm<T>>> = {
+      status: status$,
+      value: value$,
+      rawValue: rawValue$,
+      touched: touched$,
       untouched: untouched$,
-      dirty: dirty$.asReadonly(),
+      dirty: dirty$,
       pristine: pristine$,
       valid: valid$,
       invalid: invalid$,
@@ -58,17 +50,11 @@ export function formSignal<T = any>(
       disabled: disabled$,
       enabled: enabled$,
       errors: errors$,
-      subscriptions: {
-         valueChangeSubscription: valueChangeSubscription$.asReadonly(),
-         statusChangeSubscription: statusChangeSubscription$.asReadonly(),
-         touchedChangeSubscription: touchedChangeSubscription$.asReadonly(),
-         dirtyChangeSubscription: dirtyChangeSubscription$.asReadonly(),
-      },
+      [FORM_SIGNAL_FORM_TOKEN]: formAsSignal,
    };
 
-   const snapshot$ = buildFormSnapshotSignal(formSignals) as FormSignal<T>;
-
+   const snapshot$ = buildFormSnapshotSignal(formSignals);
    Object.setPrototypeOf(snapshot$, formSignals);
 
-   return snapshot$;
+   return snapshot$ as FormSignal<NonNullable<FormSignalForm<T>>>;
 }

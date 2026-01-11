@@ -1,0 +1,9 @@
+{
+  "arrowParens": "always",
+  "htmlWhitespaceSensitivity": "strict",
+  "tabWidth": 3,
+  "trailingComma": "es5",
+  "printWidth": 120,
+  "singleQuote": true,
+  "quoteProps": "consistent"
+}

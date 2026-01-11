@@ -1,28 +1,43 @@
-import {
-   Signal,
-   WritableSignal,
-   computed,
-   isSignal,
-   signal,
-} from '@angular/core';
-import { FormControlStatus } from '@angular/forms';
+import { computed, Signal, signal } from '@angular/core';
+import { AbstractControl, StatusChangeEvent, ValidationErrors, ValueChangeEvent } from '@angular/forms';
+import { filter, map, Observable, of } from 'rxjs';
 import { FormSignalOptions } from '../types/form-signal-options';
-import { FormFromType, OptionalFormFromType } from '../types/form-type';
+import { handleStreamSignal } from './handle-stream-signal';
 
-export function buildFormErrorSignal<T = any>(
-   form: Signal<OptionalFormFromType<T>> | OptionalFormFromType<T>,
-   valueSignal: WritableSignal<FormFromType<T>['value'] | null>,
-   statusSignal: WritableSignal<FormControlStatus | null>,
-   options: FormSignalOptions<T>
+export function buildFormErrorSignal<T extends AbstractControl<any>>(
+   formAsSignal: Signal<T | null>,
+   options: FormSignalOptions
 ) {
-   const formAsSignal = isSignal(form) ? form : signal(form);
+   let initErrors: ValidationErrors | null = null;
+   try {
+      // Attempt read of formAsSignal in try catch
+      // to prevent input.required errors
+      initErrors = formAsSignal()?.errors ?? null;
+   } catch {}
 
-   return computed(
-      () => {
-         const v = valueSignal();
-         const s = statusSignal();
-         return formAsSignal()?.errors ?? null;
+   const error$ = signal<ValidationErrors | null>(initErrors, {
+      equal: options.eagerNotify ? () => false : undefined,
+   });
+
+   const formStream$ = computed<{
+      form: T | null;
+      stream: Observable<any>;
+   }>(() => {
+      const form = formAsSignal();
+      const errorStream = form?.events.pipe(
+         filter((e) => e instanceof StatusChangeEvent || e instanceof ValueChangeEvent),
+         map(() => form.errors)
+      );
+      return { form, stream: errorStream ? errorStream : of(null) };
+   });
+
+   handleStreamSignal(
+      formStream$,
+      (form) => {
+         error$.set(form?.errors ?? null);
       },
-      { equal: options.equalityFns?.errorsEquality }
+      options
    );
+
+   return error$.asReadonly();
 }
