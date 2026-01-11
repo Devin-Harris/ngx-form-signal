@@ -1,10 +1,5 @@
 import { computed, Signal, untracked } from '@angular/core';
-import {
-   AbstractControl,
-   FormArray,
-   FormGroup,
-   FormRecord,
-} from '@angular/forms';
+import { AbstractControl } from '@angular/forms';
 import { deepFormSignal } from '../deep-form-signal';
 import { formSignal } from '../form-signal';
 import { DeepFormSignal } from '../types/deep-form-signal-type';
@@ -35,7 +30,7 @@ function buildEagerFormControlsSignal<T extends AbstractControl<any>>(
       { equal: () => false }
    );
 
-   const controls$ = computed<Controls>(
+   const controls$ = computed(
       () => {
          const form = formAsSignal();
 
@@ -44,12 +39,8 @@ function buildEagerFormControlsSignal<T extends AbstractControl<any>>(
          const _ = eagerValueStatus$();
 
          return untracked(() => {
-            if (
-               form instanceof FormArray ||
-               form instanceof FormGroup ||
-               form instanceof FormRecord
-            ) {
-               return form.controls;
+            if (form && 'controls' in form) {
+               return form.controls as Controls;
             }
 
             return null;
@@ -60,14 +51,10 @@ function buildEagerFormControlsSignal<T extends AbstractControl<any>>(
    return controls$;
 }
 
-function extractFormInstances(
-   formSignalsContainer: Controls
-): AbstractControl[] {
+function extractFormInstances(formSignalsContainer: Controls): AbstractControl[] {
    if (formSignalsContainer === null) return [];
    if (Array.isArray(formSignalsContainer)) return [...formSignalsContainer];
-   return Object.keys(formSignalsContainer).map(
-      (key) => formSignalsContainer[key]
-   );
+   return Object.keys(formSignalsContainer).map((key) => formSignalsContainer[key]);
 }
 
 function buildFlattenedControlsSignal(eagerControls$: Signal<Controls>) {
@@ -78,12 +65,8 @@ function buildFlattenedControlsSignal(eagerControls$: Signal<Controls>) {
       },
       {
          equal: (a, b) => {
-            const someANotInB = a.some(
-               (aItem) => !b.some((bItem) => bItem === aItem)
-            );
-            const someBNotInA = b.some(
-               (bItem) => !a.some((aItem) => aItem === bItem)
-            );
+            const someANotInB = a.some((aItem) => !b.some((bItem) => bItem === aItem));
+            const someBNotInA = b.some((bItem) => !a.some((aItem) => aItem === bItem));
             return !someANotInB && !someBNotInA;
          },
       }
@@ -95,7 +78,8 @@ function buildDeepSignalsForControls(
    flattenedControls$: Signal<AbstractControl<any, any>[]>,
    options: FormSignalOptions
 ) {
-   // Eventually change this to a linkedSignal instead of needing the lastTrackedControls and side effects in computed
+   // Using side effect in computed to prevent using effect in reactive context errors
+   // https://v20.angular.dev/errors/NG0602
    let lastTrackedControls: {
       control: AbstractControl<any, any>;
       deepFormSignal: DeepFormSignal<any>;
@@ -125,7 +109,7 @@ function buildDeepSignalsForControls(
    return controlsWithDeepSignals$;
 }
 
-function buildControlsWithDeepSignalsSignal<T extends AbstractControl<any>>(
+function mapDeepSignalsBackToControlSchema<T extends AbstractControl<any>>(
    controlsWithDeepSignals$: Signal<
       {
          control: AbstractControl<any, any>;
@@ -146,8 +130,7 @@ function buildControlsWithDeepSignalsSignal<T extends AbstractControl<any>>(
       if (Array.isArray(controls)) {
          return controls.reduce(
             (acc, c) => {
-               const match = deepSignals.find((tc) => tc.control === c)
-                  ?.deepFormSignal;
+               const match = deepSignals.find((tc) => tc.control === c)?.deepFormSignal;
                if (match) {
                   acc.push(match);
                }
@@ -158,9 +141,7 @@ function buildControlsWithDeepSignalsSignal<T extends AbstractControl<any>>(
       }
       return Object.keys(controls).reduce(
          (acc, cKey) => {
-            const match = deepSignals.find(
-               (tc) => tc.control === controls[cKey]
-            );
+            const match = deepSignals.find((tc) => tc.control === controls[cKey]);
             if (match && match.deepFormSignal) {
                return { ...acc, [cKey]: match.deepFormSignal };
             }
@@ -181,14 +162,7 @@ export function buildFormControlsSignal<T extends AbstractControl<any>>(
 ) {
    const eagerControls$ = buildEagerFormControlsSignal(formAsSignal, options);
    const flattenedControls$ = buildFlattenedControlsSignal(eagerControls$);
-   const controlsWithDeepSignals$ = buildDeepSignalsForControls(
-      flattenedControls$,
-      options
-   );
-   const controls$ = buildControlsWithDeepSignalsSignal(
-      controlsWithDeepSignals$,
-      formAsSignal
-   );
-
+   const controlsWithDeepSignals$ = buildDeepSignalsForControls(flattenedControls$, options);
+   const controls$ = mapDeepSignalsBackToControlSchema(controlsWithDeepSignals$, formAsSignal);
    return controls$;
 }

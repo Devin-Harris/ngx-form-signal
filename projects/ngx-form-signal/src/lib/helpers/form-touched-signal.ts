@@ -8,7 +8,14 @@ export function buildFormTouchedSignal<T extends AbstractControl<any>>(
    formAsSignal: Signal<T | null>,
    options: FormSignalOptions
 ) {
-   const touched$ = signal<boolean>(false, {
+   let initTouched = false;
+   try {
+      // Attempt read of formAsSignal in try catch
+      // to prevent input.required errors
+      initTouched = formAsSignal()?.touched ?? false;
+   } catch {}
+
+   const touched$ = signal<boolean>(initTouched, {
       equal: options.eagerNotify ? () => false : undefined,
    });
    const untouched$ = computed(() => !touched$(), {

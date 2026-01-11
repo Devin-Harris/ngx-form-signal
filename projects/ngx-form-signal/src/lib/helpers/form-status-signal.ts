@@ -1,9 +1,5 @@
 import { computed, signal, Signal } from '@angular/core';
-import {
-   AbstractControl,
-   FormControlStatus,
-   StatusChangeEvent,
-} from '@angular/forms';
+import { AbstractControl, FormControlStatus, StatusChangeEvent } from '@angular/forms';
 import { filter, map, Observable, of } from 'rxjs';
 import { FormSignalOptions } from '../types/form-signal-options';
 import { handleStreamSignal } from './handle-stream-signal';
@@ -12,7 +8,14 @@ export function buildFormStatusSignal<T extends AbstractControl<any>>(
    formAsSignal: Signal<T | null>,
    options: FormSignalOptions
 ) {
-   const status$ = signal<FormControlStatus | null>(null, {
+   let initStatus: FormControlStatus | null = null;
+   try {
+      // Attempt read of formAsSignal in try catch
+      // to prevent input.required errors
+      initStatus = formAsSignal()?.status ?? null;
+   } catch {}
+
+   const status$ = signal<FormControlStatus | null>(initStatus, {
       equal: options.eagerNotify ? () => false : undefined,
    });
    const valid$ = computed(() => status$() === 'VALID', {

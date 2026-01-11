@@ -37,22 +37,19 @@ describe('form-controls-signal (deep stability)', () => {
       );
 
       TestBed.flushEffects();
-      expect(runs).toBe(2);
+      expect(runs).toBe(1);
 
       // add sibling control
-      (form.controls.address as FormGroup).addControl(
-         'street',
-         new FormControl('Main St')
-      );
+      (form.controls.address as FormGroup).addControl('street', new FormControl('Main St'));
       TestBed.flushEffects();
 
-      expect(runs).toBe(2);
+      expect(runs).toBe(1);
 
       // remove sibling control
       (form.controls.address as FormGroup).removeControl('street');
       TestBed.flushEffects();
 
-      expect(runs).toBe(2);
+      expect(runs).toBe(1);
    });
 
    it('should rerun effects when using snapshot controls() access', () => {
@@ -75,26 +72,29 @@ describe('form-controls-signal (deep stability)', () => {
       );
 
       TestBed.flushEffects();
-      expect(runs).toBe(2);
+      expect(runs).toBe(1);
 
-      (form.controls.address as FormGroup).addControl(
-         'street',
-         new FormControl('Main St')
-      );
+      (form.controls.address as FormGroup).addControl('street', new FormControl('Main St'));
       TestBed.flushEffects();
 
-      expect(runs).toBe(3);
+      expect(runs).toBe(2);
+
+      (form as FormGroup).addControl('test', new FormControl('Main St'));
+      TestBed.flushEffects();
+
+      expect(runs).toBe(2);
 
       (form.controls.address as FormGroup).removeControl('street');
       TestBed.flushEffects();
 
-      expect(runs).toBe(4);
+      expect(runs).toBe(3);
    });
 
    it('should rerun effects when dynamically adding controls', () => {
+      const zip = new FormControl('12345');
       const form = new FormGroup({
          address: new FormGroup({
-            zip: new FormControl('12345'),
+            zip,
          }),
       });
 
@@ -105,26 +105,28 @@ describe('form-controls-signal (deep stability)', () => {
       effect(
          () => {
             runs++;
-            dSignal.controls.address.controls().zip.value();
+            dSignal.controls.address.controls.zip?.value();
          },
          { injector }
       );
 
       TestBed.flushEffects();
-      expect(runs).toBe(2);
+      expect(runs).toBe(1);
 
       (form.controls.address as FormGroup).removeControl('zip');
       TestBed.flushEffects();
 
-      expect(runs).toBe(3);
+      expect(runs).toBe(1);
 
-      (form.controls.address as FormGroup).addControl(
-         'zip',
-         new FormControl('123456')
-      );
+      (form.controls.address as FormGroup).addControl('zip', zip);
       TestBed.flushEffects();
 
-      expect(runs).toBe(5);
+      expect(runs).toBe(1);
+
+      zip.setValue('123456');
+      TestBed.flushEffects();
+
+      expect(runs).toBe(2);
    });
 
    it('should preserve deep signal identity when controls change', () => {
@@ -138,10 +140,7 @@ describe('form-controls-signal (deep stability)', () => {
 
       const zipSignalBefore = dSignal.controls.address.controls.zip;
 
-      (form.controls.address as FormGroup).addControl(
-         'street',
-         new FormControl('Main St')
-      );
+      (form.controls.address as FormGroup).addControl('street', new FormControl('Main St'));
       TestBed.flushEffects();
 
       const zipSignalAfter = dSignal.controls.address.controls.zip;
@@ -175,10 +174,7 @@ describe('form-controls-signal (deep stability)', () => {
 
       expect(dSignal.controls.address.controls.zip).toBeUndefined();
 
-      (form.controls.address as FormGroup).addControl(
-         'zip',
-         new FormControl('90210')
-      );
+      (form.controls.address as FormGroup).addControl('zip', new FormControl('90210'));
       TestBed.flushEffects();
       const controls = dSignal.controls.address.controls();
       TestBed.flushEffects();

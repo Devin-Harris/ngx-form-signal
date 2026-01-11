@@ -8,7 +8,14 @@ export function buildFormDirtySignal<T extends AbstractControl<any>>(
    formAsSignal: Signal<T | null>,
    options: FormSignalOptions
 ) {
-   const dirty$ = signal<boolean>(false, {
+   let initDirty = false;
+   try {
+      // Attempt read of formAsSignal in try catch
+      // to prevent input.required errors
+      initDirty = formAsSignal()?.dirty ?? false;
+   } catch {}
+
+   const dirty$ = signal<boolean>(initDirty, {
       equal: options.eagerNotify ? () => false : undefined,
    });
    const pristine$ = computed(() => !dirty$(), {
