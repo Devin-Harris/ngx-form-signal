@@ -1,12 +1,6 @@
 import { Component, Injector, input, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import {
-   FormArray,
-   FormControl,
-   FormGroup,
-   FormRecord,
-   Validators,
-} from '@angular/forms';
+import { FormArray, FormControl, FormGroup, FormRecord, Validators } from '@angular/forms';
 import { deepFormSignal } from './deep-form-signal';
 
 @Component({
@@ -40,7 +34,7 @@ describe('deepFormSignal Integration', () => {
          age: FormControl<number | null>;
       }> | null>(null);
       const dSignal = deepFormSignal(form$, { injector });
-      let controls = dSignal.controls?.();
+      let controls = dSignal.controls?.() ?? null;
       TestBed.flushEffects();
 
       expect(controls).toBeNull();
@@ -53,7 +47,7 @@ describe('deepFormSignal Integration', () => {
 
       form$.set(form);
       TestBed.flushEffects();
-      controls = dSignal.controls?.();
+      controls = dSignal.controls?.() ?? null;
       TestBed.flushEffects();
 
       expect(dSignal.value()).toEqual({ name: '', age: 1 });
@@ -81,7 +75,7 @@ describe('deepFormSignal Integration', () => {
       // mark touched
       form.controls.name.markAsTouched();
       TestBed.flushEffects();
-      controls = dSignal.controls?.();
+      controls = dSignal.controls?.() ?? null;
       TestBed.flushEffects();
       expect(dSignal.touched()).toBe(true);
       expect(controls!.name.touched()).toBe(true);
@@ -89,7 +83,7 @@ describe('deepFormSignal Integration', () => {
       // disable control
       form.controls.name.disable();
       TestBed.flushEffects();
-      controls = dSignal.controls?.();
+      controls = dSignal.controls?.() ?? null;
       TestBed.flushEffects();
       expect(dSignal.enabled()).toBe(true);
       expect(controls!.name.enabled()).toBe(false);
@@ -97,7 +91,7 @@ describe('deepFormSignal Integration', () => {
       // back to null
       form$.set(null);
       TestBed.flushEffects();
-      controls = dSignal.controls?.();
+      controls = dSignal.controls?.() ?? null;
       TestBed.flushEffects();
 
       expect(controls).toBeNull();
@@ -198,9 +192,7 @@ describe('deepFormSignal Integration', () => {
    });
 
    it('should reflect dynamically added and removed FormArray controls', () => {
-      const array = new FormArray<FormControl<string | null>>([
-         new FormControl('A'),
-      ]);
+      const array = new FormArray<FormControl<string | null>>([new FormControl('A')]);
 
       const form$ = signal(array);
       const dSignal = deepFormSignal(form$, { injector });

@@ -35,7 +35,7 @@ export function deepFormSignal<T extends FormSignalInput>(
          return snapshot?.[prop as string];
       },
       apply(_target, _thisArg, _args) {
-         return _target();
+         return _target() ?? null;
       },
    });
 
