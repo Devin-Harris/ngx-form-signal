@@ -15,6 +15,7 @@ Note this is NOT related to the built in [signal forms](https://angular.dev/guid
 -  [Usage](#usage)
    -  [Simple Example](#simple)
    -  [Deep Form Signal Example](#deepFormSignal)
+-  [Migrations](#migrations)
 -  [Issues](#issues)
 
 <a name="installation"/>
@@ -377,6 +378,14 @@ export class DeepFormSignalDynamicExampleComponent {
    }
 }
 ```
+
+<a name="migrations"/>
+
+## Migrations
+
+See the following documents for more information:
+
+-  [v2 Migration Notes](./migrations/v2.md)
 
 <a name="issues"/>
 
